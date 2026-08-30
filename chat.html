@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlastTier — Chat</title><link rel="stylesheet" href="style.css"></head><body data-kit="">
+
+<header class="site-header">
+  <a class="brand" href="index.html">BLAST<span>TIER</span></a>
+  <nav>
+    <a href="index.html">⌂ Home</a>
+    <a href="rankings.html">🏆 Rankings</a>
+    <a href="chat.html">💬 Chat</a>
+    <a href="discords.html">🎮 Discords</a>
+    <a href="api.html">▣ API Docs</a>
+  </nav>
+  <input id="searchBox" class="search" placeholder="Search player..." autocomplete="off">
+</header>
+<div class="kit-tabs">
+  <a class="kit-tab" data-kit="overall" href="index.html"><img src="assets/overall.png" alt="Overall"><span>Overall</span></a>
+  <a class="kit-tab" data-kit="ltms" href="ltms.html"><img src="assets/ltms.png" alt="LTMs"><span>LTMs</span></a>
+  <a class="kit-tab" data-kit="vanilla" href="vanilla.html"><img src="assets/vanilla.png" alt="Vanilla"><span>Vanilla</span></a>
+  <a class="kit-tab" data-kit="uhc" href="uhc.html"><img src="assets/uhc.png" alt="UHC"><span>UHC</span></a>
+  <a class="kit-tab" data-kit="pot" href="pot.html"><img src="assets/pot.png" alt="Pot"><span>Pot</span></a>
+  <a class="kit-tab" data-kit="nethop" href="nethop.html"><img src="assets/nethop.png" alt="NethOP"><span>NethOP</span></a>
+  <a class="kit-tab" data-kit="smp" href="smp.html"><img src="assets/smp.png" alt="SMP"><span>SMP</span></a>
+  <a class="kit-tab" data-kit="sword" href="sword.html"><img src="assets/sword.png" alt="Sword"><span>Sword</span></a>
+  <a class="kit-tab" data-kit="axe" href="axe.html"><img src="assets/axe.png" alt="Axe"><span>Axe</span></a>
+  <a class="kit-tab" data-kit="mace" href="mace.html"><img src="assets/mace.png" alt="Mace"><span>Mace</span></a>
+</div>
+<main class="page"><h1>💬 Chat</h1><div id="messages" class="chatbox"></div><div class="chatbar"><input id="chatInput" placeholder="Write a message..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn blue" onclick="sendChat()">Send</button></div></main>
+<script src="script.js"></script></body></html>
