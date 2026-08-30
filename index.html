@@ -1,16 +1,82 @@
 <!doctype html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BlastTier</title>
-<link rel="stylesheet" href="style.css">
-</head><body>
-<header><div class="brand">BLAST<span>TIER</span></div><nav><button>⌂ Home</button><button>🏆 Rankings</button><button>💬 Chat</button><button>🎮 Discords⌄</button><button>▣ API Docs</button></nav><input class="search" placeholder="Search player..."></header>
-<div class="tabs" id="tabs"></div>
-<main><div class="top"><button class="btn">ⓘ Information</button><button class="btn blue" onclick="openM('playerM')">＋ Add Player</button><button class="btn blue" onclick="openM('tierM')">＋ Add Tier</button><button class="btn blue" onclick="openM('kitM')">＋ Add Kit</button></div>
-<div class="empty" id="empty"><div class="trophy">🏆</div><h2>No players yet!</h2><div>Add players to start building the BlastTier rankings.</div></div><div id="playerList"></div>
-<section class="kits"><h3>ALL KITS</h3><div id="kitGrid" class="kitgrid"></div></section></main>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlastTier</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<div class="brand">BLAST<span>TIER</span></div>
+<nav>
+<button onclick="page('home')">⌂ Home</button>
+<button onclick="page('rankings')">🏆 Rankings</button>
+<button onclick="page('chat')">💬 Chat</button>
+<button onclick="page('discords')">🎮 Discords</button>
+<button onclick="page('api')">▣ API Docs</button>
+<button onclick="page('info')">ⓘ Information</button>
+</nav>
+<input id="search" placeholder="Search player" oninput="render()">
+</header>
 
-<div class="modal" id="kitM"><div class="box"><h2>Add Kit</h2><div class="field"><label>Kit name</label><input id="kitName"></div><div class="field"><label>Select MCTiers-style logo</label><div id="picker" class="pick"></div></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addKit()">Add Kit</button></div></div></div>
-<div class="modal" id="tierM"><div class="box"><h2>Add Tier</h2><div class="field"><label>Tier name</label><input id="tierName" placeholder="HT1"></div><div class="field"><label>Kit</label><select id="tierKit"></select></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addTier()">Add Tier</button></div></div></div>
-<div class="modal" id="playerM"><div class="box"><h2>Add Player</h2><div class="field"><label>Player name</label><input id="playerName"></div><div class="field"><label>Rank</label><select id="rank"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></div><div class="field"><label>Points</label><input id="points" type="number" value="0"></div><div class="field"><label>Region</label><select id="region"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></div><div class="field"><label>Skin</label><input id="skin" type="file" accept="image/*"></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addPlayer()">Add Player</button></div></div></div>
+<section id="home" class="page active">
+<div id="tabs" class="tabs"></div>
+<div class="panel">
+<div class="buttons">
+<button onclick="openM('playerM')">＋ Add Player</button>
+<button onclick="openM('tierM')">＋ Add Tier</button>
+<button onclick="openM('kitM')">＋ Add Kit</button>
+</div>
+<div id="players"></div>
+<h2 class="title">ALL KITS</h2><div id="kits" class="kitgrid"></div>
+</div>
+</section>
 
-<script src="script.js"></script></body></html>
+<section id="rankings" class="page"><div class="panel">
+<div class="buttons"><button onclick="openM('playerM')">＋ Add Player</button></div>
+<h1>🏆 Rankings</h1><div id="rankingList"></div>
+</div></section>
+
+<section id="kitpage" class="page"><div class="panel">
+<div class="buttons"><button onclick="openM('playerM')">＋ Add Player</button></div>
+<h1 id="kitTitle"></h1><div id="kitPlayers"></div>
+</div></section>
+
+<section id="chat" class="page"><div class="panel chat"><h1>💬 Chat</h1>
+<div id="messages"></div><div class="chatbar"><input id="chatInput" placeholder="Write a message" onkeydown="if(event.key==='Enter')send()"><button onclick="send()">Send</button></div>
+</div></section>
+
+<section id="discords" class="page"><div class="panel center"><h1>🎮 Discords</h1><p>Add your Discord server here.</p><button onclick="alert('Add your Discord invite link here.')">＋ Add Discord</button></div></section>
+
+<section id="api" class="page"><div class="panel"><h1>▣ API Docs</h1><pre>GET /api/players
+GET /api/kits
+GET /api/tiers</pre></div></section>
+
+<section id="info" class="page"><div class="panel"><h1>ⓘ Information</h1><p>BlastTier player, kit and tier ranking website.</p><p>No players are pre-loaded.</p></div></section>
+
+<div id="playerM" class="modal"><div class="box">
+<h2>Add Player</h2>
+<label>Player Name</label><input id="pn">
+<label>Player Tier</label><select id="pt"></select>
+<label>Rank</label><select id="rank"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select>
+<label>Points</label><input id="points" type="number" value="0">
+<label>Region</label><select id="region"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select>
+<label>Skin</label><input id="skin" type="file" accept="image/*">
+<label>Kit + Tier</label><div class="row"><select id="ck"></select><select id="ct"></select><button onclick="combo()">＋</button></div>
+<div id="chosen"></div>
+<div class="actions"><button onclick="closeM()">Cancel</button><button class="blue" onclick="addPlayer()">Add Player</button></div>
+</div></div>
+
+<div id="kitM" class="modal"><div class="box">
+<h2>Add Kit</h2><label>Kit Name</label><input id="kn" placeholder="Sword">
+<label>Kit Logo</label><div class="logos">⚔️ 🪓 🔨 🧪 ❤️ 🎯 🟩 🔥 🌎</div>
+<div class="actions"><button onclick="closeM()">Cancel</button><button class="blue" onclick="addKit()">Add Kit</button></div>
+</div></div>
+
+<div id="tierM" class="modal"><div class="box">
+<h2>Add Tier</h2><label>Tier Name</label><input id="tn" placeholder="HT1">
+<label>Kit</label><select id="tk"></select>
+<div class="actions"><button onclick="closeM()">Cancel</button><button class="blue" onclick="addTier()">Add Tier</button></div>
+</div></div>
+
+<script src="script.js"></script>
+</body></html>
