@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlastTier</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<header><div class="brand">BLAST<span>TIER</span></div><nav><button>⌂ Home</button><button>🏆 Rankings</button><button>💬 Chat</button><button>🎮 Discords⌄</button><button>▣ API Docs</button></nav><input class="search" placeholder="Search player..."></header>
+<div class="tabs" id="tabs"></div>
+<main><div class="top"><button class="btn">ⓘ Information</button><button class="btn blue" onclick="openM('playerM')">＋ Add Player</button><button class="btn blue" onclick="openM('tierM')">＋ Add Tier</button><button class="btn blue" onclick="openM('kitM')">＋ Add Kit</button></div>
+<div class="empty" id="empty"><div class="trophy">🏆</div><h2>No players yet!</h2><div>Add players to start building the BlastTier rankings.</div></div><div id="playerList"></div>
+<section class="kits"><h3>ALL KITS</h3><div id="kitGrid" class="kitgrid"></div></section></main>
+
+<div class="modal" id="kitM"><div class="box"><h2>Add Kit</h2><div class="field"><label>Kit name</label><input id="kitName"></div><div class="field"><label>Select MCTiers-style logo</label><div id="picker" class="pick"></div></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addKit()">Add Kit</button></div></div></div>
+<div class="modal" id="tierM"><div class="box"><h2>Add Tier</h2><div class="field"><label>Tier name</label><input id="tierName" placeholder="HT1"></div><div class="field"><label>Kit</label><select id="tierKit"></select></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addTier()">Add Tier</button></div></div></div>
+<div class="modal" id="playerM"><div class="box"><h2>Add Player</h2><div class="field"><label>Player name</label><input id="playerName"></div><div class="field"><label>Rank</label><select id="rank"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></div><div class="field"><label>Points</label><input id="points" type="number" value="0"></div><div class="field"><label>Region</label><select id="region"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></div><div class="field"><label>Skin</label><input id="skin" type="file" accept="image/*"></div><div class="actions"><button class="btn" onclick="closeM()">Cancel</button><button class="btn blue" onclick="addPlayer()">Add Player</button></div></div></div>
+
+<script src="script.js"></script></body></html>
