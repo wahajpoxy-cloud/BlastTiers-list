@@ -1,6 +1,6 @@
 const FIXED=[
- ["overall","Overall","🏆"],["ltms","LTMs","⚔️"],["vanilla","Vanilla","⬡"],["uhc","UHC","♥"],["pot","Pot","🧪"],
- ["nethop","NethOP","⬟"],["smp","SMP","◉"],["sword","Sword","🗡️"],["axe","Axe","🪓"],["mace","Mace","🔨"]
+ ["overall","Overall","assets/overall.png"],["ltms","LTMs","assets/ltms.png"],["vanilla","Vanilla","assets/vanilla.png"],["uhc","UHC","assets/uhc.png"],["pot","Pot","assets/pot.png"],
+ ["nethop","NethOP","assets/nethop.png"],["smp","SMP","assets/smp.png"],["sword","Sword","assets/sword.png"],["axe","Axe","assets/axe.png"],["mace","Mace","assets/mace.png"]
 ];
 let players=JSON.parse(localStorage.getItem("blast_players")||"[]");
 let kits=JSON.parse(localStorage.getItem("blast_kits")||"[]");
@@ -9,7 +9,7 @@ let pending=[];let selectedLogo="sword";
 
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function save(){localStorage.setItem("blast_players",JSON.stringify(players));localStorage.setItem("blast_kits",JSON.stringify(kits));localStorage.setItem("blast_tiers",JSON.stringify(tiers))}
-function iconFor(name){let x=FIXED.find(a=>a[1].toLowerCase()==String(name).toLowerCase());return x?x[2]:(kits.find(k=>k.name==name)?.logo||"◉")}
+function iconFor(name){let x=FIXED.find(a=>a[1].toLowerCase()==String(name).toLowerCase());return x?`<img src="${x[2]}" alt="${x[1]}">`:(kits.find(k=>k.name==name)?.logo||"<span>◉</span>")}
 function renderTabs(){
  const e=document.getElementById("kitTabs");
  e.innerHTML=FIXED.map((x,i)=>`<button class="kit-tab ${i==0?"active":""}" onclick="${i==0?"show('home')":`openKit('${x[1]}',this)`}""><div class="kit-icon">${x[2]}</div>${x[1]}</button>`).join("");
