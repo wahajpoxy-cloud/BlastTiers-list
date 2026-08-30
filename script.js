@@ -1,18 +1,44 @@
-let players=[],kits=[],tiers=[],combos=[];
-const icons={Sword:"⚔️",Axe:"🪓",Mace:"🔨",Pot:"🧪",UHC:"❤️",LTMs:"🎯",Vanilla:"🟩",NethOP:"🔥",SMP:"🌎"};
-function page(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');render()}
-function openM(id){document.getElementById(id).classList.add('show');selects()}
-function closeM(){document.querySelectorAll('.modal').forEach(x=>x.classList.remove('show'))}
-function selects(){pt.innerHTML='<option value="">No Tier</option>'+tiers.map(x=>`<option>${x.name}</option>`).join('');tk.innerHTML=kits.map(x=>`<option>${x.name}</option>`).join('');ck.innerHTML=kits.map(x=>`<option>${x.name}</option>`).join('');ct.innerHTML=tiers.map(x=>`<option>${x.name}</option>`).join('')}
-function combo(){if(!ck.value||!ct.value)return;combos.push({kit:ck.value,tier:ct.value});chosen.innerHTML=combos.map((x,i)=>`<div>${icons[x.kit]||'◉'} ${x.kit} → <b>${x.tier}</b> <button onclick="combos.splice(${i},1);combo()">×</button></div>`).join('')}
-function addKit(){let n=kn.value.trim();if(!n)return alert('Enter kit name');kits.push({name:n,logo:Object.keys(icons)[kits.length%Object.keys(icons).length]});kn.value='';closeM();render();selects()}
-function addTier(){let n=tn.value.trim();if(!n)return alert('Enter tier name');tiers.push({name:n,kit:tk.value});tn.value='';closeM();selects()}
-function addPlayer(){let n=pn.value.trim();if(!n)return alert('Enter player name');let p={name:n,tier:pt.value,rank:rank.value,points:points.value,region:region.value,combos:[...combos],skin:''};let f=skin.files[0];let done=()=>{players.push(p);combos=[];chosen.innerHTML='';pn.value='';skin.value='';closeM();render()};if(f){let r=new FileReader();r.onload=e=>{p.skin=e.target.result;done()};r.readAsDataURL(f)}else done()}
-function del(i){players.splice(i,1);render()}
-function playerHTML(p,i){let c=p.combos.length?p.combos.map(x=>`<div class="combo"><span class="icon">${icons[x.kit]||'◉'}</span>${x.kit}<span class="tier">${x.tier}</span></div>`).join(''):'<span class="muted">No kits</span>';return `<div class="player"><b>${i+1}.</b><div class="skin">${p.skin?`<img src="${p.skin}">`:''}</div><div class="pinfo"><strong>${p.name}</strong><div class="muted">${p.rank} • ${p.points} points${p.tier?' • '+p.tier:''}</div></div><span class="region">${p.region}</span><div class="combos">${c}</div><button class="delete" onclick="del(${i})">Delete</button></div>`}
-function render(){renderTabs();renderKits();let e=document.getElementById('players');if(e)e.innerHTML=players.length?players.map(playerHTML).join(''):`<div class="empty"><div class="trophy">🏆</div><h2>No players yet!</h2><p>Add a player to start.</p></div>`;let r=document.getElementById('rankingList');if(r)r.innerHTML=players.length?[...players].sort((a,b)=>b.points-a.points).map(playerHTML).join(''):`<div class="empty"><h2>No rankings yet!</h2></div>`}
-function renderTabs(){}
-function renderKits(){let e=document.getElementById('kits');if(!e)return;e.innerHTML=kits.length?kits.map(k=>`<div class="kitcard"><div class="icon">${icons[k.logo]||'◉'}</div>${k.name}</div>`).join(''):'<span class="muted">No kits added yet.</span>'}
-function kitPage(n){page('kitpage');kitTitle.textContent=n;kitPlayers.innerHTML=players.filter(p=>p.combos.some(x=>x.kit===n)).map(playerHTML).join('')||`<div class="empty"><h2>No players in ${n} yet!</h2></div>`}
-function send(){let x=chatInput.value.trim();if(!x)return;messages.innerHTML+=`<div class="msg">${x}</div>`;chatInput.value=''}
-render();selects();
+const FIXED=[
+ ["overall","Overall","🏆"],["ltms","LTMs","⚔️"],["vanilla","Vanilla","⬡"],["uhc","UHC","♥"],["pot","Pot","🧪"],
+ ["nethop","NethOP","⬟"],["smp","SMP","◉"],["sword","Sword","🗡️"],["axe","Axe","🪓"],["mace","Mace","🔨"]
+];
+let players=JSON.parse(localStorage.getItem("blast_players")||"[]");
+let kits=JSON.parse(localStorage.getItem("blast_kits")||"[]");
+let tiers=JSON.parse(localStorage.getItem("blast_tiers")||"[]");
+let pending=[];let selectedLogo="sword";
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function save(){localStorage.setItem("blast_players",JSON.stringify(players));localStorage.setItem("blast_kits",JSON.stringify(kits));localStorage.setItem("blast_tiers",JSON.stringify(tiers))}
+function iconFor(name){let x=FIXED.find(a=>a[1].toLowerCase()==String(name).toLowerCase());return x?x[2]:(kits.find(k=>k.name==name)?.logo||"◉")}
+function renderTabs(){
+ const e=document.getElementById("kitTabs");
+ e.innerHTML=FIXED.map((x,i)=>`<button class="kit-tab ${i==0?"active":""}" onclick="${i==0?"show('home')":`openKit('${x[1]}',this)`}""><div class="kit-icon">${x[2]}</div>${x[1]}</button>`).join("");
+}
+function show(id){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");renderPlayers();renderRankings();document.querySelectorAll(".kit-tab").forEach((b,i)=>b.classList.toggle("active",id=="home"&&i==0))}
+function openKit(name,btn){document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));document.getElementById("kitPage").classList.add("active");document.getElementById("kitTitle").textContent=name;document.querySelectorAll(".kit-tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");let a=players.filter(p=>(p.combos||[]).some(c=>c.kit==name));document.getElementById("kitPlayerList").innerHTML=a.length?a.map((p)=>playerHTML(p,players.indexOf(p))).join(""):`<div class="empty"><b>◉</b><h2>No players in ${esc(name)} yet!</h2></div>`}
+function openModal(id){document.getElementById(id).classList.add("show");updateSelects();if(id=="kitModal")logoPicker()}
+function closeModals(){document.querySelectorAll(".modal").forEach(x=>x.classList.remove("show"))}
+function updateSelects(){
+ playerTier.innerHTML='<option value="">No Player Tier</option>'+tiers.map(t=>`<option>${esc(t.name)}</option>`).join("");
+ tierKit.innerHTML=kits.length?kits.map(k=>`<option>${esc(k.name)}</option>`).join(""):'<option value="">No kits yet</option>';
+ comboKit.innerHTML=[...FIXED.slice(1).map(x=>`<option>${x[1]}</option>`),...kits.map(k=>`<option>${esc(k.name)}</option>`)].join("");
+ comboTier.innerHTML=tiers.length?tiers.map(t=>`<option>${esc(t.name)}</option>`).join(""):'<option value="">No tiers yet</option>';
+}
+function logoPicker(){document.getElementById("logoRow").innerHTML=FIXED.slice(1).map(x=>`<button class="${selectedLogo==x[0]?"selected":""}" onclick="selectedLogo='${x[0]}';logoPicker()"><div class="kit-icon">${x[2]}</div>${x[1]}</button>`).join("")}
+function addKit(){let n=kitName.value.trim();if(!n)return alert("Enter kit name");if(kits.some(k=>k.name.toLowerCase()==n.toLowerCase()))return alert("Kit already exists");kits.push({name:n,logo:FIXED.find(x=>x[1].toLowerCase()==n.toLowerCase())?.[2]||"◉"});save();kitName.value="";closeModals();render()}
+function addTier(){let n=tierName.value.trim();if(!n)return alert("Enter tier name");tiers.push({name:n,kit:tierKit.value});save();tierName.value="";closeModals();render()}
+function addCombo(){if(!comboKit.value||!comboTier.value)return;pending.push({kit:comboKit.value,tier:comboTier.value});document.getElementById("chosen").innerHTML=pending.map((x,i)=>`<div>${iconFor(x.kit)} ${esc(x.kit)} → <b class="tier">${esc(x.tier)}</b> <button onclick="pending.splice(${i},1);addCombo()">×</button></div>`).join("")}
+function addPlayer(){
+ let n=playerName.value.trim();if(!n)return alert("Enter player name");
+ let p={id:Date.now(),name:n,tier:playerTier.value,rank:playerRank.value,points:Number(playerPoints.value||0),region:playerRegion.value,combos:[...pending],skin:""};
+ let f=playerSkin.files[0],done=()=>{players.push(p);pending=[];document.getElementById("chosen").innerHTML="";closeModals();save();render()};
+ if(f){let r=new FileReader();r.onload=e=>{p.skin=e.target.result;done()};r.readAsDataURL(f)}else done()
+}
+function del(i){if(confirm("Delete this player?")){players.splice(i,1);save();render()}}
+function playerHTML(p,i){let combos=(p.combos||[]).map(c=>`<div class="combo"><span class="kit-icon">${iconFor(c.kit)}</span><span>${esc(c.kit)}<br><b class="tier">${esc(c.tier)}</b></span></div>`).join("")||'<span class="muted">No kits assigned</span>';return `<div class="player"><span class="number">${i+1}.</span><div class="skin">${p.skin?`<img src="${p.skin}">`:""}</div><div class="pinfo"><div class="pname">${esc(p.name)}</div><div class="muted">◆ ${esc(p.rank)} (${esc(p.points)} points)${p.tier?" • "+esc(p.tier):""}</div></div><span class="region">${esc(p.region)}</span><div class="combos">${combos}</div><button class="delete" onclick="del(${i})">Delete</button></div>`}
+function renderPlayers(){let e=document.getElementById("playerList");if(!e)return;let q=(search.value||"").toLowerCase();let a=players.filter(p=>p.name.toLowerCase().includes(q));e.innerHTML=a.length?a.map(p=>playerHTML(p,players.indexOf(p))).join(""):`<div class="empty"><b>🏆</b><h2>No players yet!</h2><p>Add a player to start the rankings.</p></div>`}
+function renderRankings(){let e=document.getElementById("rankingList");if(!e)return;let a=[...players].sort((a,b)=>b.points-a.points);e.innerHTML=a.length?a.map((p,i)=>playerHTML(p,players.indexOf(p))).join(""):`<div class="empty"><b>🏆</b><h2>No rankings yet!</h2></div>`}
+function renderKits(){let e=document.getElementById("kitGrid");if(!e)return;e.innerHTML=kits.length?kits.map(k=>`<div class="kit-card"><div class="kit-icon">${iconFor(k.name)}</div>${esc(k.name)}</div>`).join(""):'<span class="muted">No custom kits added yet.</span>'}
+function render(){renderTabs();renderKits();renderPlayers();renderRankings();updateSelects()}
+function sendChat(){let v=chatInput.value.trim();if(!v)return;messages.innerHTML+=`<div class="msg">${esc(v)}</div>`;chatInput.value=""}
+render();
