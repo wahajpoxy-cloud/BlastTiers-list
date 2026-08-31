@@ -252,3 +252,84 @@ body{background:#07111d!important;color:#eaf4ff!important}
  .skin{width:46px!important;height:46px!important;flex-basis:46px!important}.pname{font-size:16px!important}
  .combos{grid-template-columns:repeat(13,minmax(22px,1fr))!important;gap:1px!important}.combo img{width:19px!important;height:19px!important}.combo .tier{font-size:8px!important}
 }
+
+/* BlastTier FINAL visual correction: no page/kit scrollbar, compact logo-over-tier cells */
+html, body { overflow-x: hidden !important; }
+body { min-width: 0 !important; }
+.wrap { width: 100%; max-width: 1380px; }
+.rank-panel { width: 100%; overflow: hidden; }
+
+/* Ranking rows stay one row on desktop. Kits are compact logo-over-tier cells. */
+.player-row {
+  width: 100% !important;
+  grid-template-columns: 42px minmax(255px, 1fr) 58px minmax(0, 2.6fr) 72px !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+}
+.player-info { min-width: 0 !important; }
+.combos {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(13, minmax(0, 1fr)) !important;
+  gap: 2px !important;
+  overflow: hidden !important;
+  align-items: start !important;
+}
+.combo {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 2px 1px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+.combo img { width: 25px !important; height: 25px !important; }
+.combo .tier { font-size: 10px !important; line-height: 12px !important; white-space: nowrap !important; }
+.row-actions { display: flex !important; visibility: visible !important; opacity: 1 !important; justify-content: flex-end !important; }
+.edit-row { display: inline-flex !important; visibility: visible !important; opacity: 1 !important; }
+
+/* Edit dialog: usable scrolling and no false "all kits" error. */
+.modal-card { overflow-y: auto !important; overflow-x: hidden !important; }
+#editCombos { overflow: visible !important; max-height: none !important; }
+#addPlayerKit:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Home: clean blue BlastTier landing page using the existing asset icons. */
+.hero {
+  margin-top: 18px !important;
+  padding: 64px 28px 52px !important;
+  border: 1px solid #1c3a56 !important;
+  border-radius: 18px !important;
+  background: radial-gradient(circle at 85% 10%, #123c67 0, transparent 36%), linear-gradient(135deg,#0a1a2b,#07111c 70%) !important;
+  box-shadow: 0 20px 55px #0005 !important;
+}
+.hero h1 { font-size: clamp(42px,5vw,60px) !important; }
+.hero p { font-size: 17px !important; }
+.kit-grid { grid-template-columns: repeat(6, minmax(0,1fr)) !important; gap: 12px !important; }
+.kit-card { min-height: 132px !important; padding: 14px 8px !important; }
+.kit-card img { width: 62px !important; height: 62px !important; }
+
+/* Tabs never create a browser-level horizontal scrollbar. */
+.tabs { overflow: hidden !important; }
+
+@media (max-width: 1050px) {
+  .player-row { grid-template-columns: 38px minmax(220px,1fr) 54px minmax(0,2.2fr) 64px !important; }
+  .combo img { width: 22px !important; height: 22px !important; }
+  .combo .tier { font-size: 9px !important; }
+  .kit-grid { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: repeat(4,minmax(0,1fr)) !important; }
+  .player-row { grid-template-columns: 30px minmax(155px,1fr) 48px minmax(0,2fr) 58px !important; gap: 5px !important; }
+  .skin { width: 44px !important; height: 44px !important; flex-basis: 44px !important; }
+  .pname { font-size: 16px !important; }
+  .meta { font-size: 11px !important; }
+  .combo img { width: 18px !important; height: 18px !important; }
+  .combo .tier { font-size: 8px !important; line-height: 10px !important; }
+  .kit-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+}

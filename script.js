@@ -104,11 +104,22 @@ function renderEdit(){
  <button type="button" class="btn danger remove-kit" data-i="${i}" title="Remove this kit tier">×</button></div>`).join(''):'<div class="edit-empty">No kit tiers added yet.</div>';
  box.querySelectorAll('.remove-kit').forEach(b=>b.onclick=()=>{p.combos.splice(+b.dataset.i,1);renderEdit()});
 }
+function refreshAddKitButton(){
+ const btn=m.querySelector('#addPlayerKit');
+ if(!btn)return;
+ const combos=p.combos||[];
+ const available=data.kits.find(k=>!combos.some(c=>c.kit===k.name));
+ btn.disabled=!available;
+ btn.textContent=available?'＋ Add Kit + Tier':'✓ All Kits Added — Edit Existing Rows';
+ btn.title=available?'Add another kit and tier':'All available kits are already assigned. Edit the rows above.';
+}
 m.querySelector('#addPlayerKit').onclick=()=>{
  p.combos=p.combos||[];
- let available=data.kits.find(k=>!p.combos.some(c=>c.kit===k.name));
- if(!available){alert('All kits are already added. Edit the existing kit rows instead.');return}
- p.combos.push({kit:available.name,tier:''});renderEdit();
+ const available=data.kits.find(k=>!p.combos.some(c=>c.kit===k.name));
+ if(!available){refreshAddKitButton();return}
+ p.combos.push({kit:available.name,tier:''});
+ renderEdit();
+ refreshAddKitButton();
 };
 m.querySelector('#saveEdit').onclick=()=>{
  let n=m.querySelector('#epn').value.trim();if(!n)return alert('Enter player name.');
@@ -119,6 +130,7 @@ m.querySelector('#saveEdit').onclick=()=>{
  if(f){let r=new FileReader();r.onload=e=>{p.skin=e.target.result;done()};r.readAsDataURL(f)}else done();
 };
 renderEdit();
+refreshAddKitButton();
 }
 function addTier(){let m=modal(`<button class="close">×</button><h2>Add Tier</h2><div class="form"><label>Tier name</label><input id="tn" placeholder="HT1"><label>Kit</label><select id="tk">${data.kits.map(k=>`<option>${esc(k.name)}</option>`).join('')}</select><div class="form-actions"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="add">Add Tier</button></div></div>`);m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancel').onclick=()=>m.remove();m.querySelector('#add').onclick=()=>{let n=$('#tn').value.trim(),k=$('#tk').value;if(!n)return alert('Enter tier name.');data.tiers.push({name:n,kit:k});save();m.remove()}}
 function addKit(){let m=modal(`<button class="close">×</button><h2>Add Kit</h2><div class="form"><label>Kit name</label><input id="kn" placeholder="Crystal"><label>Choose icon</label><div id="icons" class="icon-picker">${data.kits.map(k=>k.icon).filter((v,i,a)=>a.indexOf(v)===i).concat(['sword','axe','mace','pot','uhc','vanilla','ltms','nethop','smp','cart','spearmace','diamond-smp']).filter((v,i,a)=>a.indexOf(v)===i).map(k=>`<button type="button" class="icon-pick" data-icon="${k}"><img src="assets/${k}.png"></button>`).join('')}</div><div class="form-actions"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="add">Add Kit</button></div></div>`);let selected='sword';m.querySelectorAll('.icon-pick').forEach(b=>b.onclick=()=>{selected=b.dataset.icon;m.querySelectorAll('.icon-pick').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancel').onclick=()=>m.remove();m.querySelector('#add').onclick=()=>{let n=$('#kn').value.trim();if(!n)return alert('Enter kit name.');if(data.kits.some(k=>k.name.toLowerCase()===n.toLowerCase()))return alert('Kit already exists.');data.kits.push({name:n,icon:selected});save();m.remove();tabs();renderRows()}}
