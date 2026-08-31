@@ -110,172 +110,151 @@ button{cursor:pointer}
 </div></div>
 
 <script>
-(function(){
-"use strict";
+/* BlastTier - original design, button-safe patch */
+const LOGOS={
+sword:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#e9f5ff" d="M40 4h12v12h-6v6h-6v6h-6v6H22v-6h6v-6h6v-6h6z"/><path fill="#58aefc" d="M34 28h6v6h-6v6h-6v6h-6v-6h6v-6h6z"/><path fill="#385b86" d="M16 40h12v6H16z"/><path fill="#c99b43" d="M10 46h24v6H10z"/><path fill="#8b5c2e" d="M16 52h8v8h-8z"/></svg>`,
+axe:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#e8edf4" d="M34 4h14v6h6v16h-8v6h-8v-6h-6V14h-6V8h8z"/><path fill="#64c7f6" d="M40 10h12v14H40z"/><path fill="#a56b35" d="M27 25h7v31h-7z"/><path fill="#70462c" d="M23 52h8v8h-8z"/></svg>`,
+mace:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#9ba4b3" d="M26 4h12v8h8v8h8v14H42v-6H22v6H10V20h8v-8h8z"/><path fill="#d7dce5" d="M18 20h28v10H18z"/><path fill="#70798a" d="M29 28h8v32h-8z"/><path fill="#b8c0cd" d="M25 52h16v8H25z"/></svg>`,
+pot:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#f2f4f7" d="M24 4h16v8h6v8H18v-8h6z"/><path fill="#df3e55" d="M16 20h32v30H16z"/><path fill="#b52c48" d="M20 28h24v22H20z"/><path fill="#f58aa0" d="M24 28h16v8H24z"/><path fill="#fff" d="M22 8h20v4H22z"/></svg>`,
+nethop:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#c28df0" d="M14 18h8v-8h20v8h8v8h4v20h-8v8H18v-8h-8V26h4z"/><path fill="#8354ae" d="M18 24h10v14H18zM36 24h10v14H36z"/><path fill="#dfb2ff" d="M26 12h12v8H26z"/><path fill="#6c3e91" d="M24 44h16v8H24z"/></svg>`,
+smp:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><circle cx="32" cy="32" r="22" fill="#007d6f"/><circle cx="25" cy="24" r="8" fill="#57e2c8"/><circle cx="38" cy="40" r="11" fill="#00534e"/><circle cx="22" cy="21" r="3" fill="#d4fff5"/></svg>`,
+vanilla:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#dfe9f8" d="M32 4l20 15-6 29-14 12-14-12-6-29z"/><path fill="#a45fe0" d="M32 4v56L12 48l6-29z"/><path fill="#f7f4ff" d="M32 4l20 15-20 11z"/><path fill="#8d4cc7" d="M32 30v30l14-12 6-29z"/></svg>`,
+uhc:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#ee4b59" d="M32 56S7 40 7 22C7 10 21 6 29 17c2 3 3 5 3 5s1-2 3-5C43 6 57 10 57 22c0 18-25 34-25 34z"/><path fill="#ff7b85" d="M18 20c4-5 9-5 13 0-4-1-8 1-11 5z"/></svg>`,
+ltms:`<svg viewBox="0 0 64 64" shape-rendering="crispEdges"><path fill="#f0f4fa" d="M10 14h18l4 7 4-7h18l-8 16 8 20H38l-6-10-6 10H10l8-20z"/><path fill="#8ca1b9" d="M16 20h10l6 10-6 10H16l5-10z"/><path fill="#d9e4ef" d="M48 20H38l-6 10 6 10h10l-5-10z"/></svg>`
+};
 
-var STORAGE_PLAYERS="blasttier_players_v2";
-var STORAGE_TIERS="blasttier_tiers_v2";
-var STORAGE_KITS="blasttier_kits_v2";
-
-var DEFAULT_KITS=[
- ["Overall","overall"],["LTMs","ltms"],["Vanilla","vanilla"],["UHC","uhc"],
- ["Pot","pot"],["NethOP","nethop"],["SMP","smp"],["Sword","sword"],["Axe","axe"],["Mace","mace"]
+const defaults=[
+ ['Overall','🏆',null],['LTMs',null,'ltms'],['Vanilla',null,'vanilla'],['UHC',null,'uhc'],['Pot',null,'pot'],
+ ['NethOP',null,'nethop'],['SMP',null,'smp'],['Sword',null,'sword'],['Axe',null,'axe'],['Mace',null,'mace']
 ];
 
-var players=load("players",[]);
-var tiers=load("tiers",[]);
-var kits=load("kits",DEFAULT_KITS.slice());
-var selectedLogo="sword";
+let players=read('bt_players',[]);
+let kits=read('bt_kits',[]);
+let tiers=read('bt_tiers',[]);
+let chats=read('bt_chats',[]);
+let selectedIcon='sword';
 
-function load(type,fallback){
- try{
-  var key=type==="players"?STORAGE_PLAYERS:type==="tiers"?STORAGE_TIERS:STORAGE_KITS;
-  var x=JSON.parse(localStorage.getItem(key));
-  return Array.isArray(x)?x:fallback.slice();
- }catch(e){return fallback.slice();}
+function read(k,f){try{const v=JSON.parse(localStorage.getItem(k)||'null');return Array.isArray(v)?v:f.slice()}catch(e){return f.slice()}}
+function save(){
+ localStorage.setItem('bt_players',JSON.stringify(players));
+ localStorage.setItem('bt_kits',JSON.stringify(kits));
+ localStorage.setItem('bt_tiers',JSON.stringify(tiers));
+ localStorage.setItem('bt_chats',JSON.stringify(chats));
 }
-function saveAll(){
- try{
-  localStorage.setItem(STORAGE_PLAYERS,JSON.stringify(players));
-  localStorage.setItem(STORAGE_TIERS,JSON.stringify(tiers));
-  localStorage.setItem(STORAGE_KITS,JSON.stringify(kits));
- }catch(e){console.warn(e);}
-}
-function esc(v){
- return String(v==null?"":v).replace(/[&<>"']/g,function(c){
-  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
- });
-}
+function logo(k){return `<span class="embedded-logo">${LOGOS[k]||LOGOS.sword}</span>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 
-function page(id,btn){
- document.querySelectorAll("nav button").forEach(function(x){x.classList.remove("active");});
- if(btn)btn.classList.add("active");
- var app=document.getElementById("app");
- if(!app)return;
- if(id==="home")app.innerHTML=home();
- else if(id==="rankings")app.innerHTML=ranking();
- else if(id==="players")app.innerHTML=playersPage();
- else if(id==="chat")app.innerHTML=chatPage();
- else if(id==="addplayer")app.innerHTML=addPlayer();
- else if(id==="addkit")app.innerHTML=addKit();
- else if(id==="addtier"){app.innerHTML=addTier();setTimeout(fillTierKits,0);}
+function buildTabs(){
+ const box=document.getElementById('tabs'); if(!box)return;
+ box.innerHTML=defaults.map((x,i)=>`<button type="button" class="tab ${i===0?'active':''}" data-kit="${esc(x[0])}">${x[1]?`<span class="ico">${x[1]}</span>`:`<span class="ico">${logo(x[2])}</span>`}<span>${esc(x[0])}</span></button>`).join('');
+ box.querySelectorAll('.tab').forEach((b,i)=>b.addEventListener('click',()=>selectKit(i,b)));
 }
-
-function home(){
- return '<div class="pageTitle"><h1>BlastTier</h1><p class="muted">Competitive Minecraft PvP tier rankings.</p></div>'+
- '<section class="cards"><div class="card"><b>⚔️</b><h3>10 Kits</h3><p>Overall, LTMs, Vanilla, UHC, Pot, NethOP, SMP, Sword, Axe and Mace.</p></div>'+
- '<div class="card"><b>👤</b><h3>Players</h3><p>Browse players, skins, ranks and kit tiers.</p></div>'+
- '<div class="card"><b>🏆</b><h3>Rankings</h3><p>View players ordered by competitive points.</p></div></section>';
+function selectKit(i,btn){
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ btn.classList.add('active');
 }
-function playerCards(){
- if(!players.length)return '<div class="empty"><strong>🏆</strong><h2>No players yet!</h2><p>Add a player to start BlastTier rankings.</p></div>';
- return players.slice().sort(function(a,b){return (b.score||0)-(a.score||0);}).map(function(p,i){
-  return '<div class="player"><div class="place">'+(i+1)+'.</div><div class="skin">'+
-  (p.skin?'<img src="'+esc(p.skin)+'" alt="">':'')+'</div><div><div class="name">'+esc(p.name)+'</div>'+
-  '<div class="meta">◆ '+esc(p.title||"Player")+' ('+(Number(p.score)||0)+' points)'+
-  (p.playerTier?' • '+esc(p.playerTier):'')+'</div></div><div class="region">'+esc(p.region||"NA")+
-  '</div><div class="combos">'+(p.t||[]).map(function(x,j){return '<div class="combo"><span>'+esc(kits[j]?kits[j][0]:"Kit")+
-  '<br><b class="tier">'+esc(x||"—")+'</b></span></div>';}).join("")+
-  '</div><button type="button" class="btn red" data-delete-player="'+esc(p.id)+'">Delete</button></div>';
- });
+function fillSelects(){
+ const ps=document.getElementById('ptier'),ts=document.getElementById('tkit');
+ if(ps)ps.innerHTML='<option value="">No tier</option>'+tiers.map(t=>`<option value="${esc(t.name)}">${esc(t.name)}</option>`).join('');
+ if(ts)ts.innerHTML=kits.length?kits.map(k=>`<option value="${esc(k.name)}">${esc(k.name)}</option>`).join(''):'<option value="">No kit</option>';
 }
-function ranking(){
- return '<div class="pageTitle"><h1>Rankings</h1><p class="muted">Top BlastTier players.</p></div><div id="rows">'+playerCards()+'</div>';
+function render(){
+ const search=document.getElementById('search');
+ const q=(search?.value||'').toLowerCase();
+ const list=players.filter(p=>String(p.name||'').toLowerCase().includes(q));
+ const rows=document.getElementById('rows');
+ if(!rows)return;
+ if(!list.length)rows.innerHTML='<div class="empty"><div class="emptyIcon">🏆</div><h2>No players yet!</h2><p>Add players to start building the BlastTier rankings.</p></div>';
+ else rows.innerHTML=list.map((p,i)=>`<div class="row">
+ <div class="rank">${i+1}.</div>
+ <div class="player"><div class="skin">${p.skin?`<img src="${p.skin}" alt="">`:esc(String(p.name||'').slice(0,2).toUpperCase())}</div>
+ <div><div class="pname">${esc(p.name)}</div><div class="sub"><b>◆</b> ${esc(p.rank)} <span>(${esc(p.points)} points)</span></div></div></div>
+ <div><span class="region">${esc(p.region)}</span></div>
+ <div class="tierbox">${(p.tiers||[]).length?(p.tiers||[]).map(t=>{const x=tiers.find(a=>a.name===t);return `<div class="tierbadge"><div class="kitcircle">${logo(x?.icon||'sword')}</div><div class="tiername">${esc(t)}</div></div>`}).join(''):'<span style="color:#667d93">No tiers</span>'}</div>
+ </div>`).join('');
+ const grid=document.getElementById('kitGrid');
+ if(grid)grid.innerHTML=kits.length?kits.map(k=>`<div class="kitcard"><div class="kitbig">${logo(k.icon)}</div>${esc(k.name)}</div>`).join(''):'<div style="grid-column:1/-1;text-align:center;color:#627b93">No kits added yet.</div>';
+ fillSelects();renderChat();
 }
-function playersPage(){
- return '<div class="pageTitle"><h1>Players</h1><p class="muted">Minecraft skins and competitive results.</p></div><div id="rows">'+playerCards()+'</div>';
+function openModal(type){
+ const id=type==='player'?'playerModal':type==='kit'?'kitModal':'tierModal';
+ const m=document.getElementById(id);if(m)m.classList.add('show');
+ if(type==='kit')buildIconPicker();fillSelects();
 }
-function chatPage(){
- return '<div class="chat"><h2>BlastTier Chat</h2><div id="messages" class="messages"></div><div class="chatbar"><input id="chatInput" placeholder="Write a message..."><button type="button" class="btn blue" id="sendChatBtn">Send</button></div></div>';
-}
-function addPlayer(){
- var tierOptions=tiers.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join("");
- var kitFields=kits.slice(0,10).map(function(k,i){return '<label>'+esc(k[0])+'<input id="tier'+i+'" placeholder="HT1"></label>';}).join("");
- return '<div class="form"><h1>Add Player</h1><p class="muted">Add a player to BlastTier.</p>'+
- '<label>Player name<input id="playerName" placeholder="Minecraft username"></label>'+
- '<label>Player skin URL<input id="playerSkin" placeholder="https://mc-heads.net/body/PlayerName/100.png"></label>'+
- '<label>Region<select id="playerRegion"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></label>'+
- '<label>Combat rank<select id="playerTitle"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></label>'+
- '<label>Player tier<select id="playerTier"><option value="">No overall tier</option>'+tierOptions+'</select></label>'+
- '<label>Points<input id="playerScore" type="number" min="0" value="0"></label>'+
- '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+kitFields+'</div>'+
- '<button type="button" class="btn blue" id="savePlayerBtn">Add Player</button><p id="msg" class="muted"></p></div>';
+function closeModals(){document.querySelectorAll('.modal').forEach(x=>x.classList.remove('show'))}
+function buildIconPicker(){
+ const box=document.getElementById('iconPicker');if(!box)return;
+ box.innerHTML=Object.keys(LOGOS).map(k=>`<button type="button" class="iconPick ${selectedIcon===k?'selected':''}" data-icon="${k}">${logo(k)}<br><small>${k}</small></button>`).join('');
+ box.querySelectorAll('[data-icon]').forEach(b=>b.addEventListener('click',()=>{selectedIcon=b.dataset.icon;buildIconPicker()}));
 }
 function addKit(){
- return '<div class="form"><h1>Add Kit</h1><p class="muted">Add a kit to BlastTier.</p>'+
- '<label>Kit name<input id="newKit" placeholder="Crystal"></label>'+
- '<label>Kit logo<input id="newIcon" placeholder="sword"></label>'+
- '<button type="button" class="btn blue" id="saveKitBtn">Add Kit</button><p id="msg" class="muted"></p></div>';
+ const input=document.getElementById('kname'),name=(input?.value||'').trim();
+ if(!name)return alert('Enter a kit name.');
+ if(kits.some(k=>k.name.toLowerCase()===name.toLowerCase()))return alert('Kit already exists.');
+ kits.push({name,icon:selectedIcon});save();
+ if(input)input.value='';selectedIcon='sword';closeModals();render();
 }
 function addTier(){
- return '<div class="form"><h1>Add Tier</h1><p class="muted">Create a tier for a kit.</p>'+
- '<label>Kit<select id="tierKit"></select></label>'+
- '<label>Tier name<input id="tierName" placeholder="HT1"></label>'+
- '<button type="button" class="btn blue" id="saveTierBtn">Add Tier</button><p id="msg" class="muted"></p></div>';
+ const input=document.getElementById('tname'),name=(input?.value||'').trim(),kitName=document.getElementById('tkit')?.value;
+ if(!name)return alert('Enter a tier name.');
+ if(!kitName)return alert('Add a kit first.');
+ if(tiers.some(t=>t.name.toLowerCase()===name.toLowerCase()&&t.kit===kitName))return alert('That tier already exists.');
+ const k=kits.find(x=>x.name===kitName);
+ tiers.push({name,kit:kitName,icon:k?.icon||'sword'});save();
+ input.value='';closeModals();render();
 }
-function fillTierKits(){
- var e=document.getElementById("tierKit");if(!e)return;
- e.innerHTML=kits.map(function(k){return '<option value="'+esc(k[0])+'">'+esc(k[0])+'</option>';}).join("");
-}
-function savePlayer(){
- var n=document.getElementById("playerName"),msg=document.getElementById("msg");
- if(!n||!n.value.trim()){if(msg)msg.textContent="Enter a player name.";return;}
- var name=n.value.trim();
- if(players.some(function(p){return p.name.toLowerCase()===name.toLowerCase();})){if(msg)msg.textContent="Player already exists.";return;}
- var p={id:String(Date.now())+Math.random(),name:name,
- region:document.getElementById("playerRegion").value,title:document.getElementById("playerTitle").value,
- score:Number(document.getElementById("playerScore").value)||0,
- playerTier:document.getElementById("playerTier").value,
- skin:document.getElementById("playerSkin").value.trim()||("https://mc-heads.net/body/"+encodeURIComponent(name)+"/100.png"),
- t:kits.map(function(_,i){var e=document.getElementById("tier"+i);return e&&e.value.trim()?e.value.trim():"—";})};
- players.push(p);saveAll();if(msg)msg.textContent=name+" added successfully.";setTimeout(function(){page("rankings");},300);
-}
-function saveKit(){
- var n=document.getElementById("newKit"),msg=document.getElementById("msg");
- if(!n||!n.value.trim()){if(msg)msg.textContent="Enter kit name.";return;}
- var name=n.value.trim();
- if(kits.some(function(k){return k[0].toLowerCase()===name.toLowerCase();})){if(msg)msg.textContent="Kit already exists.";return;}
- var icon=(document.getElementById("newIcon").value.trim()||"sword").toLowerCase();
- kits.push([name,icon]);saveAll();if(msg)msg.textContent="Kit added successfully.";
-}
-function saveTier(){
- var k=document.getElementById("tierKit"),t=document.getElementById("tierName"),msg=document.getElementById("msg");
- if(!k||!t||!t.value.trim()){if(msg)msg.textContent="Choose a kit and enter a tier.";return;}
- var value=t.value.trim(),key=k.value+"|"+value;
- if(tiers.some(function(x){return x===key;})){if(msg)msg.textContent="That tier already exists.";return;}
- tiers.push(key);saveAll();if(msg)msg.textContent=value+" added to "+k.value+".";
-}
-function loadChat(){
- var e=document.getElementById("messages");if(!e)return;
- var a=[];try{a=JSON.parse(localStorage.getItem("btchat")||"[]");}catch(x){}
- if(!a.length)a=[{n:"BlastTier",t:"Welcome to the BlastTier community chat!"}];
- e.innerHTML=a.map(function(m){return '<div class="msg"><b>'+esc(m.n)+'</b><div>'+esc(m.t)+'</div></div>';}).join("");
+function addPlayer(){
+ const name=(document.getElementById('pn')?.value||'').trim();
+ if(!name)return alert('Enter a player name.');
+ if(players.some(p=>p.name.toLowerCase()===name.toLowerCase()))return alert('Player already exists.');
+ const file=document.getElementById('pskin')?.files?.[0];
+ const p={name,rank:document.getElementById('prank')?.value||'Combat Master',points:Number(document.getElementById('pp')?.value||0),region:document.getElementById('preg')?.value||'NA',tiers:document.getElementById('ptier')?.value?[document.getElementById('ptier').value]:[],skin:''};
+ const finish=()=>{players.push(p);save();document.getElementById('pn').value='';document.getElementById('pskin').value='';closeModals();render()};
+ if(file){
+  const r=new FileReader();r.onload=e=>{p.skin=e.target.result;finish()};r.onerror=()=>alert('Could not read skin.');r.readAsDataURL(file);
+ }else finish();
 }
 function sendChat(){
- var i=document.getElementById("chatInput");if(!i||!i.value.trim())return;
- var a=[];try{a=JSON.parse(localStorage.getItem("btchat")||"[]");}catch(x){}
- a.push({n:"You",t:i.value.trim()});localStorage.setItem("btchat",JSON.stringify(a));i.value="";loadChat();
+ const input=document.getElementById('chatInput'),text=(input?.value||'').trim();if(!text)return;
+ chats.push({name:'You',text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+ input.value='';save();renderChat();
 }
-document.addEventListener("click",function(e){
- var el=e.target.closest("[data-delete-player]");
- if(el){
-  var id=el.getAttribute("data-delete-player");
-  players=players.filter(function(p){return String(p.id)!==String(id);});saveAll();
-  var rows=document.getElementById("rows");if(rows)rows.innerHTML=playerCards();
- }
- if(e.target.id==="savePlayerBtn")savePlayer();
- if(e.target.id==="saveKitBtn")saveKit();
- if(e.target.id==="saveTierBtn")saveTier();
- if(e.target.id==="sendChatBtn")sendChat();
-});
-document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="chatInput")sendChat();});
-document.addEventListener("DOMContentLoaded",function(){
- document.querySelectorAll("nav button").forEach(function(b){
-  b.addEventListener("click",function(){var p=b.getAttribute("data-page");if(p)page(p,b);});
+function renderChat(){
+ const box=document.getElementById('messages');if(!box)return;
+ box.innerHTML=chats.length?chats.map(m=>`<div class="msg"><b style="color:#42a3ff">${esc(m.name)}</b> <small style="color:#68819a">${esc(m.time)}</small><div style="margin-top:5px">${esc(m.text)}</div></div>`).join(''):'<div style="text-align:center;color:#617a91;padding-top:180px">No messages yet.</div>';
+ box.scrollTop=box.scrollHeight;
+}
+function page(name,btn){
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('show'));
+ const panel=document.getElementById(name);if(panel)panel.classList.add('show');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+}
+
+function bind(){
+ document.querySelectorAll('.nav button').forEach((b,i)=>{
+  b.type='button';
+  b.removeAttribute('onclick');
+  b.addEventListener('click',()=> {
+   if(i===0)page('rankings',b);
+   else if(i===1)page('rankings',b);
+   else if(i===2)page('chat',b);
+  });
  });
- page("home",document.querySelector('nav button[data-page="home"]'));
-});
-})();
+ document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+ document.getElementById('search')?.addEventListener('input',render);
+}
+function boot(){
+ bind();buildTabs();render();fillSelects();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+window.openModal=openModal;
+window.closeModals=closeModals;
+window.addPlayer=addPlayer;
+window.addKit=addKit;
+window.addTier=addTier;
+window.selectIcon=selectIcon;
+function selectIcon(k){selectedIcon=k;buildIconPicker()}
 </script>
 </body>
 </html>
