@@ -231,3 +231,14 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
 #addKitTier{position:sticky!important;bottom:0!important;margin-top:8px!important;z-index:3!important}
 .full-delete{margin-bottom:4px!important}
 @media(max-height:760px){.modal{padding-top:10px!important}.modal .box{max-height:calc(100vh - 20px)!important}.modal #editCombos{max-height:250px!important}}
+
+/* FINAL EDIT MODAL: one scroll area, no trapped nested kit scroll */
+.modal{overflow:hidden!important;align-items:center!important;padding:16px!important}
+.modal .box{height:min(92vh,900px)!important;max-height:92vh!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;width:min(580px,94vw)!important;box-sizing:border-box!important}
+.modal .box .edit-form{min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;padding:2px 8px 12px 2px!important;scrollbar-width:auto!important}
+#editCombos{max-height:none!important;overflow:visible!important;padding-right:0!important}
+.edit-combo{min-height:42px!important}
+.add-kit-tier{position:sticky!important;bottom:0!important;z-index:5!important;flex:0 0 auto!important;margin-top:10px!important;box-shadow:0 -8px 14px rgba(7,15,25,.9)!important}
+.edit-actions{position:sticky!important;bottom:0!important;z-index:4!important;background:#0c1826!important;padding:10px 0 6px!important;margin-top:8px!important}
+.full-delete{position:static!important;flex:0 0 auto!important;margin:8px 0 4px!important}
+@media(max-height:700px){.modal{padding:6px!important}.modal .box{height:96vh!important;max-height:96vh!important}.modal .box .edit-form{padding-bottom:10px!important}}

@@ -27,9 +27,10 @@ function profile(id){
 }
 function editPlayer(id){
  const p=data.players.find(x=>x.id===id); if(!p)return;
- p.combos=p.combos||[];
- const m=modal(`<button class="close">×</button><h2>Edit Player</h2>
- <div class="form">
+ // Work on a draft so Cancel never changes the saved player.
+ let draftCombos=(p.combos||[]).map(c=>({kit:c.kit,tier:c.tier||""}));
+ const m=modal(`<button class="close" type="button">×</button><h2>Edit Player</h2>
+ <div class="form edit-form">
  <label>Player name</label><input id="epn" value="${esc(p.name)}">
  <label>Rank</label><select id="epr">${["Combat Grandmaster","Combat Master","Combat Ace","Rookie"].map(x=>`<option ${x===p.rank?"selected":""}>${x}</option>`).join("")}</select>
  <label>Points</label><input id="epp" type="number" value="${+p.points||0}">
@@ -37,31 +38,39 @@ function editPlayer(id){
  <label>Skin</label><input id="eps" type="file" accept="image/*">
  <h3>Kit + Tier</h3><div class="kit-tier-head"><span>Kit</span><span>Tier</span><span></span></div>
  <div id="editCombos"></div>
- <button type="button" class="btn primary" id="addKitTier">＋ Add Kit + Tier</button>
- <div class="form-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button type="button" class="btn primary" id="saveEdit">Save Changes</button></div>
+ <button type="button" class="btn primary add-kit-tier" id="addKitTier">＋ Add Kit + Tier</button>
+ <div class="form-actions edit-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button type="button" class="btn primary" id="saveEdit">Save Changes</button></div>
  <button type="button" class="btn danger full-delete" id="deletePlayer">Delete Player</button>
  </div>`);
- m.querySelector(".close").onclick=()=>closeModal(m);
- m.querySelector("#cancelEdit").onclick=()=>closeModal(m);
+ m.querySelector('.close').onclick=()=>closeModal(m);
+ m.querySelector('#cancelEdit').onclick=()=>closeModal(m);
  function renderCombos(){
-   const box=m.querySelector("#editCombos");
-   box.innerHTML=p.combos.length?p.combos.map((c,i)=>`<div class="edit-combo">
-   <select class="edit-kit">${data.kits.map(k=>`<option value="${esc(k.name)}" ${k.name===c.kit?"selected":""}>${esc(k.name)}</option>`).join("")}</select>
-   <input class="edit-tier" value="${esc(c.tier||"")}" placeholder="HT1 / LT1">
-   <button type="button" class="btn danger remove-kit" data-i="${i}">×</button></div>`).join(""):"<div class='muted'>No kit tiers added.</div>";
-   box.querySelectorAll(".remove-kit").forEach(b=>b.onclick=()=>{p.combos.splice(+b.dataset.i,1);renderCombos()});
+   const box=m.querySelector('#editCombos');
+   box.innerHTML=draftCombos.length?draftCombos.map((c,i)=>`<div class="edit-combo">
+   <select class="edit-kit">${data.kits.map(k=>`<option value="${esc(k.name)}" ${k.name===c.kit?'selected':''}>${esc(k.name)}</option>`).join('')}</select>
+   <input class="edit-tier" value="${esc(c.tier)}" placeholder="HT1 / LT1">
+   <button type="button" class="btn danger remove-kit" data-i="${i}" title="Remove kit">×</button></div>`).join(''):'<div class="muted edit-empty">No kit tiers added yet.</div>';
+   box.querySelectorAll('.remove-kit').forEach(b=>b.onclick=()=>{draftCombos.splice(+b.dataset.i,1);renderCombos()});
  }
- m.querySelector("#addKitTier").onclick=()=>{const available=data.kits.find(k=>!p.combos.some(c=>c.kit===k.name));if(!available)return alert("All kits are already added.");p.combos.push({kit:available.name,tier:""});renderCombos()};
- m.querySelector("#deletePlayer").onclick=()=>{if(confirm(`Delete ${p.name}?`)){data.players=data.players.filter(x=>x.id!==p.id);save();closeModal(m);renderRows()}};
- m.querySelector("#saveEdit").onclick=()=>{
-   const n=m.querySelector("#epn").value.trim();if(!n)return alert("Enter player name.");
-   p.name=n;p.rank=m.querySelector("#epr").value;p.points=+m.querySelector("#epp").value||0;p.region=m.querySelector("#epg").value;
-   p.combos=[...m.querySelectorAll(".edit-combo")].map(r=>({kit:r.querySelector(".edit-kit").value,tier:r.querySelector(".edit-tier").value.trim()})).filter(x=>x.tier);
-   const f=m.querySelector("#eps").files[0], done=()=>{save();closeModal(m);renderRows()};
+ m.querySelector('#addKitTier').onclick=()=>{
+   const available=data.kits.find(k=>!draftCombos.some(c=>c.kit===k.name));
+   if(!available){alert('All available kits are already added.');return}
+   draftCombos.push({kit:available.name,tier:''});
+   renderCombos();
+   const last=m.querySelector('.edit-combo:last-child');
+   if(last){last.scrollIntoView({behavior:'smooth',block:'center'});last.querySelector('.edit-tier')?.focus()}
+ };
+ m.querySelector('#deletePlayer').onclick=()=>{if(confirm(`Delete ${p.name}?`)){data.players=data.players.filter(x=>x.id!==p.id);save();closeModal(m);renderRows()}};
+ m.querySelector('#saveEdit').onclick=()=>{
+   const n=m.querySelector('#epn').value.trim();if(!n)return alert('Enter player name.');
+   p.name=n;p.rank=m.querySelector('#epr').value;p.points=+m.querySelector('#epp').value||0;p.region=m.querySelector('#epg').value;
+   p.combos=[...m.querySelectorAll('.edit-combo')].map(r=>({kit:r.querySelector('.edit-kit').value,tier:r.querySelector('.edit-tier').value.trim()})).filter(x=>x.tier);
+   const f=m.querySelector('#eps').files[0],done=()=>{save();closeModal(m);renderRows()};
    if(f){const r=new FileReader();r.onload=e=>{p.skin=e.target.result;done()};r.readAsDataURL(f)}else done();
  };
  renderCombos();
 }
+
 function renderTabs(){
  const tabs=$("#tabs");if(!tabs)return;
  const arr=[["overall","Overall"],...Object.entries(NAMES)];
