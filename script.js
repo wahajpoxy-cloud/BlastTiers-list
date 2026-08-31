@@ -3,15 +3,22 @@ const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],[
 const KEY='blasttier_final_v6';
 let data=JSON.parse(localStorage.getItem(KEY)||'null');
 if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
-// Restore any missing kit tabs without replacing existing asset icons or player data.
-if(!Array.isArray(data.kits)) data.kits=[];
-// Normalize kit list by name only; keep the first existing icon so user assets are untouched.
-const seenKits=new Set();
-data.kits=data.kits.filter(k=>{const n=String(k.name||'').trim();if(!n||seenKits.has(n.toLowerCase()))return false;seenKits.add(n.toLowerCase());return true;});
-KIT_DEFAULT.slice(1).forEach(([name,icon])=>{
-  if(!data.kits.some(k=>String(k.name).toLowerCase()===name.toLowerCase())) data.kits.push({name,icon});
-});
-save();
+// Normalize built-in kit tabs: exactly one of each, preserving existing asset icons.
+const canonical=[...KIT_DEFAULT.slice(1)];
+const existing=Array.isArray(data.kits)?data.kits:[];
+const usedNames=new Set(), usedIcons=new Set();
+const normalized=[];
+for(const [name,icon] of canonical){
+  const found=existing.find(k=>String(k.name||'').trim().toLowerCase()===name.toLowerCase() || String(k.icon||'').trim().toLowerCase()===icon.toLowerCase());
+  const item={name,icon:found?.icon||icon}; normalized.push(item); usedNames.add(name.toLowerCase()); usedIcons.add(String(item.icon).toLowerCase());
+}
+// Preserve genuine custom kits, but never duplicate a built-in name or icon.
+for(const k of existing){
+  const name=String(k.name||'').trim(), icon=String(k.icon||'').trim();
+  if(!name || usedNames.has(name.toLowerCase()) || (icon && usedIcons.has(icon.toLowerCase()))) continue;
+  normalized.push({name,icon:icon||name.toLowerCase().replace(/\s+/g,'-')}); usedNames.add(name.toLowerCase()); if(icon)usedIcons.add(icon.toLowerCase());
+}
+data.kits=normalized; save();
 
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
@@ -27,17 +34,15 @@ function renderRows(filter='Overall'){
  if(filter!=='Overall')list=list.filter(p=>(p.combos||[]).some(c=>c.kit===filter));
  if(!list.length){rows.innerHTML='<div class="empty"><h2>No players yet</h2><p>Add a player to start building rankings.</p></div>';return}
  rows.innerHTML=list.map((p,i)=>{
-   let combos=(p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('');
+   const combos=(p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('');
    return `<div class="player-row" data-player="${esc(p.id)}">
      <div class="place">${i+1}.</div>
-     <div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2).toUpperCase())}</div>
-       <div><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div>
-     </div>
+     <div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2).toUpperCase())}</div><div><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div></div>
      <div class="region">${esc(p.region)}</div>
      <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
    </div>`;
  }).join('');
- rows.querySelectorAll('.player-row').forEach(r=>r.onclick=()=>profile(r.dataset.player));
+ rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{if(e.target.closest('button,a,input,select'))return;profile(r.dataset.player)});
 }
 
 function kitSlug(n){return ({'LTMs':'ltms','NethOP':'nethop','Diamond SMP':'diamond-smp','SpearMace':'spearmace'}[n]||n.toLowerCase().replace(/\s+/g,'-'))}
