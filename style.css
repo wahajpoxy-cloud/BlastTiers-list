@@ -223,3 +223,11 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
  .combo{min-width:25px !important;max-width:38px !important}.combo img{width:19px !important;height:19px !important}.combo span{font-size:9px !important}
  .row-actions{width:60px !important}.edit-player{padding:7px 9px !important;font-size:12px !important}
 }
+/* EDIT MODAL SCROLL FIX */
+.modal{overflow-y:auto!important;align-items:flex-start!important;padding:28px 12px 40px!important;box-sizing:border-box!important}
+.modal .box{max-height:calc(100vh - 56px)!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;width:min(560px,94vw)!important;padding:24px!important}
+.modal .form{padding-bottom:4px!important}
+#editCombos{max-height:360px!important;overflow-y:auto!important;padding-right:4px!important}
+#addKitTier{position:sticky!important;bottom:0!important;margin-top:8px!important;z-index:3!important}
+.full-delete{margin-bottom:4px!important}
+@media(max-height:760px){.modal{padding-top:10px!important}.modal .box{max-height:calc(100vh - 20px)!important}.modal #editCombos{max-height:250px!important}}
