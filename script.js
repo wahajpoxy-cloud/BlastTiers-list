@@ -11,6 +11,46 @@ function img(k){return `assets/${kitIcon(k)}.png`}
 function allKits(){return [{name:'Overall',icon:'overall'},...data.kits]}
 function tabs(){let b=$('#tabs');if(!b)return;b.innerHTML=allKits().map(k=>`<button class="tab ${k.name==='Overall'?'active':''}" data-kit="${esc(k.name)}"><img src="assets/${k.icon}.png"><span>${esc(k.name)}</span></button>`).join('');b.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{b.querySelectorAll('.tab').forEach(y=>y.classList.remove('active'));x.classList.add('active');renderRows(x.dataset.kit)})}
 function playerCombos(p){return (p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('')}
+
+var editingPlayer=null;
+function openEditPlayer(id){
+ editingPlayer=players.find(function(p){return p.id===id}); if(!editingPlayer)return;
+ var m=document.getElementById("editPlayerModal"); if(!m)return;
+ document.getElementById("epName").value=editingPlayer.name||"";
+ document.getElementById("epRank").value=editingPlayer.rank||"LT3";
+ document.getElementById("epPoints").value=editingPlayer.points||0;
+ document.getElementById("epRegion").value=editingPlayer.region||"AS";
+ renderEditCombos(); m.classList.add("show");
+}
+function renderEditCombos(){
+ var b=document.getElementById("editCombos"); if(!b)return;
+ var cs=editingPlayer?.combos||[];
+ b.innerHTML=cs.length?cs.map(function(c,i){
+  return '<div class="edit-combo"><select class="edit-kit" data-i="'+i+'">'+kits.map(function(k){return '<option '+(k.name===c.kit?'selected':'')+'>'+esc(k.name)+'</option>'}).join("")+'</select><input class="edit-tier" data-i="'+i+'" value="'+esc(c.tier||"")+'" placeholder="Tier"><button type="button" class="btn danger remove-combo" data-i="'+i+'">×</button></div>';
+ }).join(""):'<div class="edit-empty">No kit tiers added yet.</div>';
+ b.querySelectorAll(".remove-combo").forEach(function(x){x.onclick=function(){editingPlayer.combos.splice(Number(x.dataset.i),1);renderEditCombos()}});
+}
+function addPlayerKit(){
+ if(!editingPlayer)return;
+ editingPlayer.combos=editingPlayer.combos||[];
+ editingPlayer.combos.push({kit:kits[0]?.name||"Sword",tier:""});
+ renderEditCombos();
+}
+function saveEditedPlayer(){
+ if(!editingPlayer)return;
+ var n=document.getElementById("epName").value.trim(); if(!n)return alert("Enter a player name.");
+ editingPlayer.name=n; editingPlayer.rank=document.getElementById("epRank").value;
+ editingPlayer.points=Number(document.getElementById("epPoints").value)||0;
+ editingPlayer.region=document.getElementById("epRegion").value;
+ editingPlayer.combos=Array.from(document.querySelectorAll(".edit-combo")).map(function(r){return {kit:r.querySelector(".edit-kit").value,tier:r.querySelector(".edit-tier").value.trim()}}).filter(function(x){return x.tier});
+ save();closeModals();editingPlayer=null;renderPlayers();
+}
+function deletePlayer(id){
+ var p=players.find(function(x){return x.id===id}); if(!p)return;
+ if(!confirm('Delete player "'+p.name+'"?'))return;
+ players=players.filter(function(x){return x.id!==id});save();renderPlayers();
+}
+
 function renderRows(filter='Overall'){
  let rows=$('#rows');if(!rows)return;let list=data.players.slice().sort((a,b)=>(+b.points||0)-(+a.points||0));
  if(filter!=='Overall')list=list.filter(p=>(p.combos||[]).some(c=>c.kit===filter));
@@ -30,3 +70,8 @@ function addKit(){let m=modal(`<button class="close">×</button><h2>Add Kit</h2>
 function kitPage(){let b=$('#kitRows');if(!b)return;let name=document.title.split(' — ')[0];let list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name)).sort((a,b)=>(+b.points||0)-(+a.points||0));b.innerHTML=list.length?list.map((p,i)=>`<div class="player-row" data-player="${p.id}"><div class="place">${i+1}.</div><div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2))}</div><div><div class="pname">${esc(p.name)}</div><div class="meta">${esc(p.rank)} • ${+p.points||0} points</div></div></div><div class="region">${esc(p.region)}</div><div class="combos"><div class="combo"><img src="assets/${kitIcon(name)}.png"><span class="tier">${esc(p.combos.find(c=>c.kit===name).tier)}</span></div></div><button class="btn danger delete-player" data-delete="${p.id}">Delete</button></div>`).join(''):'<div class="empty"><h2>No players yet</h2><p>No players have been added to this kit.</p></div>';b.querySelectorAll('[data-player]').forEach(r=>r.onclick=e=>{if(!e.target.closest('.delete-player'))profile(r.dataset.player)});b.querySelectorAll('.delete-player').forEach(x=>x.onclick=e=>{e.stopPropagation();deletePlayer(x.dataset.delete)})}
 function chatInit(){let b=$('#messages');if(!b)return;function render(){b.innerHTML=data.messages.length?data.messages.map(m=>`<div class="message"><b>${esc(m.name)}</b> <span class="muted">${esc(m.time)}</span><div>${esc(m.text)}</div></div>`).join(''):'<div class="empty">No messages yet.</div>'}render();$('#sendChat').onclick=()=>{let i=$('#chatText'),t=i.value.trim();if(!t)return;data.messages.push({name:'You',text:t,time:new Date().toLocaleTimeString()});i.value='';save();render()}}
 document.addEventListener('DOMContentLoaded',()=>{renderHomeKits();tabs();renderRows();kitPage();chatInit();$('#addPlayerBtn')?.addEventListener('click',addPlayer);$('#addTierBtn')?.addEventListener('click',addTier);$('#addKitBtn')?.addEventListener('click',addKit);$('#globalSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){let q=e.target.value.trim().toLowerCase();if(q)location.href='rankings.html?search='+encodeURIComponent(q)}});let q=new URLSearchParams(location.search).get('search');if(q&&$('#rows')){setTimeout(()=>{$('#globalSearch').value=q;renderRows();let r=$('#rows');r.innerHTML=[...r.querySelectorAll('.player-row')].filter(x=>x.innerText.toLowerCase().includes(q)).map(x=>x.outerHTML).join('')||'<div class="empty">No matching player.</div>'},0)}});
+
+document.addEventListener("click",function(e){
+ var ed=e.target.closest&&e.target.closest(".edit-player"); if(ed){openEditPlayer(ed.dataset.edit);return}
+ var del=e.target.closest&&e.target.closest(".delete-player"); if(del){deletePlayer(del.dataset.delete);return}
+});
