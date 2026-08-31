@@ -48,8 +48,10 @@ function renderRows(filter='Overall'){
      <div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2).toUpperCase())}</div><div class="player-copy"><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div></div>
      <div class="region">${esc(p.region)}</div>
      <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
+     <div class="row-actions"><button type="button" class="btn edit-row" data-edit="${esc(p.id)}">Edit</button></div>
    </div>`;
  }).join('');
+ rows.querySelectorAll('.edit-row').forEach(b=>b.onclick=e=>{e.stopPropagation();editPlayer(b.dataset.edit)});
  rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{
    if(e.target.closest('button,a,input,select'))return;
    profile(r.dataset.player);
