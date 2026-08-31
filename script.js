@@ -73,10 +73,11 @@ function editPlayer(id){
 
 function renderTabs(){
  const tabs=$("#tabs");if(!tabs)return;
- const arr=[["overall","Overall"],...Object.entries(NAMES)];
- tabs.innerHTML=arr.map(([id,name],i)=>`<button class="tab ${i===0?"active":""}" data-kit="${name}"><img src="${LOGOS[id]||`assets/${id}.png`}"><span>${name}</span></button>`).join("");
- tabs.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{tabs.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderRows(b.dataset.kit)});
+ const arr=[["overall","Overall"],["ltms","LTMs"],["vanilla","Vanilla"],["uhc","UHC"],["pot","Pot"],["nethop","NethOP"],["smp","SMP"],["diamond-smp","Diamond SMP"],["sword","Sword"],["axe","Axe"],["mace","Mace"],["cart","Cart"],["spearmace","SpearMace"]];
+ tabs.innerHTML=arr.map(([id,name],i)=>`<button type="button" class="tab ${i===0?"active":""}" data-kit="${esc(name)}"><img src="${LOGOS[id]||`assets/${id}.png`}" alt=""><span>${esc(name)}</span></button>`).join("");
+ tabs.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{tabs.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderRows(b.dataset.kit)}));
 }
+
 function renderRows(filter="Overall"){
  const list=$("#playerList")||$("#rows"); if(!list)return;
  let ps=[...data.players].sort((a,b)=>(+b.points||0)-(+a.points||0));
