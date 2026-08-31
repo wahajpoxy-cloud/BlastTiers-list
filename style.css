@@ -16,3 +16,31 @@
 .row-actions .btn{padding:7px 9px;font-size:12px}
 @media(max-width:1050px){.player-row{grid-template-columns:32px minmax(210px,1.1fr) 52px minmax(0,1fr) 54px;gap:6px}.skin{width:46px;height:46px;flex-basis:46px}.combo{min-width:31px}.combo img{width:17px;height:17px}.tier{font-size:9px}}
 @media(max-width:700px){.player-row{grid-template-columns:28px 1fr 50px 52px;gap:5px}.combos{grid-column:2/5;grid-row:2;overflow:hidden}.row-actions{grid-column:4;grid-row:1}.skin{width:44px;height:44px;flex-basis:44px}}
+
+/* BlastTier V4: compact rows, no horizontal scrollbar */
+html,body{overflow-x:hidden!important;max-width:100%!important}
+.wrap,.rank-panel,#rows,.player-row{max-width:100%!important;min-width:0!important}
+.tabs{width:100%!important;max-width:100%!important;min-width:0!important;grid-template-columns:repeat(13,minmax(0,1fr))!important;overflow:visible!important}
+.tab{min-width:0!important}
+.player-row{width:100%!important;grid-template-columns:32px minmax(210px,1.15fr) 52px minmax(0,1fr) 58px!important;gap:6px!important;overflow:hidden!important;min-height:70px!important;padding:7px 9px!important}
+.player-info{min-width:0!important;overflow:hidden!important;gap:7px!important}
+.skin{width:48px!important;height:48px!important;flex:0 0 48px!important}
+.pname{font-size:18px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.meta{font-size:12px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.region{font-size:13px!important;padding:7px 3px!important}
+.combos{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:2px!important;min-width:0!important;overflow:hidden!important;white-space:nowrap!important}
+.combo{min-width:0!important;width:39px!important;flex:0 0 39px!important;padding:2px!important;gap:1px!important;border-radius:6px!important}
+.combo img{width:17px!important;height:17px!important;flex:0 0 17px!important}
+.tier{font-size:9px!important;line-height:1!important;letter-spacing:-.2px!important}
+.row-actions{min-width:0!important;display:flex!important;justify-content:flex-end!important;visibility:visible!important;opacity:1!important}
+.row-actions .btn{display:inline-flex!important;padding:7px 9px!important;font-size:12px!important;visibility:visible!important;opacity:1!important}
+@media(max-width:1100px){
+ .player-row{grid-template-columns:30px minmax(190px,1.05fr) 50px minmax(0,1fr) 54px!important;gap:5px!important}
+ .skin{width:44px!important;height:44px!important;flex-basis:44px!important}
+ .combo{width:35px!important;flex-basis:35px!important}.combo img{width:15px!important;height:15px!important;flex-basis:15px!important}.tier{font-size:8px!important}
+}
+@media(max-width:700px){
+ .tabs{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+ .player-row{grid-template-columns:28px minmax(0,1fr) 48px 52px!important;grid-template-rows:auto auto!important}
+ .player-info{grid-column:2!important;grid-row:1!important}.region{grid-column:3!important;grid-row:1!important}.row-actions{grid-column:4!important;grid-row:1!important}.combos{grid-column:2/5!important;grid-row:2!important}
+}
