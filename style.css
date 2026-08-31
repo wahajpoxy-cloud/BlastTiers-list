@@ -58,3 +58,10 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
  .combos{grid-column:2/-1!important}
  .row-actions{grid-column:2/-1!important}
 }
+
+/* Clean ranking rows: actions live inside the player profile instead of cluttering the row. */
+.player-row{grid-template-columns:45px minmax(260px,1.25fr) 70px minmax(300px,2fr)!important}
+.profile-actions{display:flex;justify-content:center;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid #20384f}
+.profile-actions .btn{min-width:125px}
+@media(max-width:950px){.player-row{grid-template-columns:35px 1fr 55px!important}}
+@media(max-width:650px){.player-row{grid-template-columns:30px 1fr 48px!important}}

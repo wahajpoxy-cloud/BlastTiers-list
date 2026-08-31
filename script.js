@@ -25,20 +25,16 @@ function renderRows(filter='Overall'){
      </div>
      <div class="region">${esc(p.region)}</div>
      <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
-     <div class="row-actions">
-       <button class="btn edit-player" data-edit="${esc(p.id)}" title="Edit player and kit tiers">Edit</button>
-       <button class="btn danger delete-player" data-delete="${esc(p.id)}">Delete</button>
-     </div>
+
    </div>`;
  }).join('');
  rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{if(e.target.closest('.row-actions'))return;profile(r.dataset.player)});
- rows.querySelectorAll('.edit-player').forEach(b=>b.onclick=e=>{e.stopPropagation();editPlayer(b.dataset.edit)});
- rows.querySelectorAll('.delete-player').forEach(b=>b.onclick=e=>{e.stopPropagation();deletePlayer(b.dataset.delete)});
+
 }
 
 function renderHomeKits(){let b=$('#homeKits');if(!b)return;b.innerHTML=data.kits.map(k=>`<a class="kit-card" href="${k.name.toLowerCase()==='ltms'?'ltms':k.name.toLowerCase()==='nethop'?'nethop':k.name.toLowerCase()}.html"><img src="assets/${k.icon}.png"><strong>${esc(k.name)}</strong></a>`).join('')}
 function modal(inner){let m=document.createElement('div');m.className='modal show';m.innerHTML=`<div class="modal-card">${inner}</div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.remove()});return m}
-function profile(id){let p=data.players.find(x=>x.id===id);if(!p)return;let combos=(p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('');let m=modal(`<button class="close">×</button><div class="profile"><div class="big-skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2))}</div><h2>${esc(p.name)}</h2><div class="pill">◆ ${esc(p.rank)}</div><div class="muted">${esc(p.region)}</div><a class="btn" style="margin-top:12px" target="_blank" rel="noopener" href="https://namemc.com/search?q=${encodeURIComponent(p.name)}">◉ NameMC ↗</a><h3>POSITION</h3><div class="position"><b>${data.players.slice().sort((a,b)=>(+b.points||0)-(+a.points||0)).findIndex(x=>x.id===p.id)+1}.</b> 🏆 <strong>OVERALL</strong> <span class="muted">(${+p.points||0} points)</span></div><h3>TIERS</h3><div class="profile-tiers">${combos||'<span class="muted">No tiers</span>'}</div></div>`);m.querySelector('.close').onclick=()=>m.remove()}
+function profile(id){let p=data.players.find(x=>x.id===id);if(!p)return;let combos=(p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('');let m=modal(`<button class="close">×</button><div class="profile"><div class="big-skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2))}</div><h2>${esc(p.name)}</h2><div class="pill">◆ ${esc(p.rank)}</div><div class="muted">${esc(p.region)}</div><a class="btn" style="margin-top:12px" target="_blank" rel="noopener" href="https://namemc.com/search?q=${encodeURIComponent(p.name)}">◉ NameMC ↗</a><h3>POSITION</h3><div class="position"><b>${data.players.slice().sort((a,b)=>(+b.points||0)-(+a.points||0)).findIndex(x=>x.id===p.id)+1}.</b> 🏆 <strong>OVERALL</strong> <span class="muted">(${+p.points||0} points)</span></div><h3>TIERS</h3><div class="profile-tiers">${combos||'<span class="muted">No tiers</span>'}</div><div class="profile-actions"><button type="button" class="btn edit-profile">Edit Player</button><button type="button" class="btn danger delete-profile">Delete Player</button></div></div>`);m.querySelector('.close').onclick=()=>m.remove();m.querySelector('.edit-profile').onclick=()=>{m.remove();editPlayer(id)};m.querySelector('.delete-profile').onclick=()=>{m.remove();deletePlayer(id)}}
 function deletePlayer(id){let p=data.players.find(x=>x.id===id);if(!p)return;if(confirm(`Delete player "${p.name}"?`)){data.players=data.players.filter(x=>x.id!==id);save();renderRows(document.querySelector('.tab.active')?.dataset.kit||'Overall')}}
 function tierOptions(){return data.tiers.map(t=>`<option value="${esc(t.name)}" data-kit="${esc(t.kit)}">${esc(t.kit)} — ${esc(t.name)}</option>`).join('')}
 function addPlayer(){
