@@ -25,7 +25,15 @@ function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function kitByName(n){return data.kits.find(k=>k.name===n)}
 function kitIcon(k){return (kitByName(k)?.icon)||'sword'}
 function img(k){return `assets/${kitIcon(k)}.png`}
-function allKits(){return [{name:'Overall',icon:'overall'},...data.kits]}
+function allKits(){
+ const seen=new Set(), out=[{name:'Overall',icon:'overall'}];
+ for(const k of data.kits){
+   const key=String(k.name||'').trim().toLowerCase();
+   if(!key||seen.has(key)||key==='overall') continue;
+   seen.add(key); out.push(k);
+ }
+ return out;
+}
 function tabs(){let b=$('#tabs');if(!b)return;b.innerHTML=allKits().map(k=>`<button class="tab ${k.name==='Overall'?'active':''}" data-kit="${esc(k.name)}"><img src="assets/${k.icon}.png"><span>${esc(k.name)}</span></button>`).join('');b.querySelectorAll('.tab').forEach(x=>x.onclick=()=>{b.querySelectorAll('.tab').forEach(y=>y.classList.remove('active'));x.classList.add('active');renderRows(x.dataset.kit)})}
 function playerCombos(p){return (p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('')}
 function renderRows(filter='Overall'){
@@ -37,14 +45,16 @@ function renderRows(filter='Overall'){
    const combos=(p.combos||[]).map(c=>`<div class="combo"><img src="${img(c.kit)}"><span class="tier">${esc(c.tier)}</span></div>`).join('');
    return `<div class="player-row" data-player="${esc(p.id)}">
      <div class="place">${i+1}.</div>
-     <div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2).toUpperCase())}</div><div><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div></div>
+     <div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2).toUpperCase())}</div><div class="player-copy"><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div></div>
      <div class="region">${esc(p.region)}</div>
      <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
    </div>`;
  }).join('');
- rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{if(e.target.closest('button,a,input,select'))return;profile(r.dataset.player)});
+ rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{
+   if(e.target.closest('button,a,input,select'))return;
+   profile(r.dataset.player);
+ });
 }
-
 function kitSlug(n){return ({'LTMs':'ltms','NethOP':'nethop','Diamond SMP':'diamond-smp','SpearMace':'spearmace'}[n]||n.toLowerCase().replace(/\s+/g,'-'))}
 function homeTabs(){let b=$('#homeTabs');if(!b)return;b.innerHTML=allKits().map(k=>`<a class="tab" href="${kitSlug(k.name)}.html"><img src="assets/${k.icon}.png"><span>${esc(k.name)}</span></a>`).join('')}
 function renderHomeKits(){let b=$('#homeKits');if(!b)return;b.innerHTML=data.kits.map(k=>`<a class="kit-card" href="${kitSlug(k.name)}.html"><img src="assets/${k.icon}.png"><strong>${esc(k.name)}</strong></a>`).join('')}
