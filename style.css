@@ -186,3 +186,40 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
 .edit-combo{display:grid;grid-template-columns:1fr 125px 38px;gap:8px;margin:7px 0}.edit-combo input,.edit-combo select{width:100%;box-sizing:border-box}
 .profile-actions{display:flex;justify-content:flex-end;margin-top:22px}.profile-actions .btn{min-width:130px}
 @media(max-width:900px){.player-row{grid-template-columns:35px 1fr 55px!important}.combos{grid-column:2/-1}.row-actions{grid-column:2/-1}}
+
+/* FINAL FIX: keep every player's kit tiers visible in one compact line */
+.player-row{
+  grid-template-columns: minmax(190px,1.05fr) 58px minmax(330px,1.6fr) 72px !important;
+  gap: 8px !important;
+  overflow: visible !important;
+}
+.combos{
+  min-width: 0 !important;
+  width: 100% !important;
+  overflow: visible !important;
+  gap: 4px !important;
+  justify-content: flex-start !important;
+}
+.combo{
+  flex: 1 1 0 !important;
+  min-width: 34px !important;
+  max-width: 54px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:1px !important;
+}
+.combo img{width:24px !important;height:24px !important}
+.combo span{font-size:11px !important;line-height:12px !important;font-weight:900 !important;white-space:nowrap !important}
+.row-actions{width:72px !important}
+@media(max-width:1000px){
+ .player-row{grid-template-columns:minmax(165px,1fr) 52px minmax(280px,1.35fr) 66px !important;gap:5px !important}
+ .combo{min-width:29px !important}.combo img{width:21px !important;height:21px !important}.combo span{font-size:10px !important}
+ .row-actions{width:66px !important}
+}
+@media(max-width:760px){
+ .player-row{grid-template-columns:minmax(135px,1fr) 45px minmax(240px,1.2fr) 60px !important;gap:4px !important}
+ .combo{min-width:25px !important;max-width:38px !important}.combo img{width:19px !important;height:19px !important}.combo span{font-size:9px !important}
+ .row-actions{width:60px !important}.edit-player{padding:7px 9px !important;font-size:12px !important}
+}
