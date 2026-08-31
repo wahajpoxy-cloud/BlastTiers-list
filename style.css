@@ -22,3 +22,20 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
  .player-row{grid-template-columns:30px 1fr 48px}
  .player-info{grid-column:2/-1}.combos{grid-column:2/-1}.row-actions{grid-column:2/-1}
 }
+
+/* Final player controls: Edit is immediately before Delete and stays on the far right. */
+.player-row{grid-template-columns:45px minmax(250px,1.25fr) 70px minmax(260px,2fr) 150px;min-width:0}
+.row-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap}
+.row-actions .btn{min-width:62px}
+.edit-player{background:#102a42;border-color:#2b638d;color:#a9d8ff}
+.kit-tier-head{display:grid;grid-template-columns:1fr 125px 38px;gap:8px;margin:14px 0 5px;color:#7890a6;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.6px}
+.edit-combo{display:grid;grid-template-columns:1fr 125px 38px;gap:8px;align-items:center}
+.edit-combo select,.edit-combo input{width:100%}
+@media(max-width:950px){
+ .player-row{grid-template-columns:35px 1fr 55px}
+ .combos{grid-column:2/-1}.row-actions{grid-column:2/-1;justify-content:flex-end}
+}
+@media(max-width:650px){
+ .player-row{grid-template-columns:30px 1fr 48px}
+ .player-info{grid-column:2/-1}.combos{grid-column:2/-1}.row-actions{grid-column:2/-1}
+}

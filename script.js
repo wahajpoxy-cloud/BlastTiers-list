@@ -1,6 +1,6 @@
 
 const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],['UHC','uhc'],['Pot','pot'],['NethOP','nethop'],['SMP','smp'],['Sword','sword'],['Axe','axe'],['Mace','mace']];
-const KEY='blasttier_final_v3';
+const KEY='blasttier_final_v4';
 let data=JSON.parse(localStorage.getItem(KEY)||'null');
 if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -26,7 +26,7 @@ function renderRows(filter='Overall'){
      <div class="region">${esc(p.region)}</div>
      <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
      <div class="row-actions">
-       <button class="btn edit-player" data-edit="${esc(p.id)}">Edit</button>
+       <button class="btn edit-player" data-edit="${esc(p.id)}" title="Edit player and kit tiers">Edit</button>
        <button class="btn danger delete-player" data-delete="${esc(p.id)}">Delete</button>
      </div>
    </div>`;
@@ -71,8 +71,9 @@ let m=modal(`<button class="close">×</button><h2>Edit Player</h2><div class="fo
 <label>Region</label><select id="epg">${['NA','EU','AS','SA','AU'].map(x=>`<option ${x===p.region?'selected':''}>${x}</option>`).join('')}</select>
 <label>Player skin</label><input id="eps" type="file" accept="image/*">
 <h3 class="edit-title">PLAYER KIT TIERS</h3>
+<div class="kit-tier-head"><span>Kit</span><span>Tier</span></div>
 <div id="editCombos" class="edit-combos"></div>
-<button type="button" class="btn" id="addPlayerKit">＋ Add Kit Tier</button>
+<button type="button" class="btn primary" id="addPlayerKit">＋ Add Kit + Tier</button>
 <div class="form-actions"><button class="btn" id="cancelEdit">Cancel</button><button class="btn primary" id="saveEdit">Save Changes</button></div>
 </div>`);
 m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancelEdit').onclick=()=>m.remove();
@@ -80,11 +81,16 @@ function renderEdit(){
  let box=m.querySelector('#editCombos');let cs=p.combos||[];
  box.innerHTML=cs.length?cs.map((c,i)=>`<div class="edit-combo">
  <select class="edit-kit">${data.kits.map(k=>`<option value="${esc(k.name)}" ${k.name===c.kit?'selected':''}>${esc(k.name)}</option>`).join('')}</select>
- <input class="edit-tier" value="${esc(c.tier||'')}" placeholder="Tier e.g. HT1">
- <button type="button" class="btn danger remove-kit" data-i="${i}">×</button></div>`).join(''):'<div class="edit-empty">No kit tiers added.</div>';
+ <input class="edit-tier" value="${esc(c.tier||'')}" placeholder="HT1 / LT1 / HT2">
+ <button type="button" class="btn danger remove-kit" data-i="${i}" title="Remove this kit tier">×</button></div>`).join(''):'<div class="edit-empty">No kit tiers added yet.</div>';
  box.querySelectorAll('.remove-kit').forEach(b=>b.onclick=()=>{p.combos.splice(+b.dataset.i,1);renderEdit()});
 }
-m.querySelector('#addPlayerKit').onclick=()=>{p.combos=p.combos||[];p.combos.push({kit:data.kits[0]?.name||'Sword',tier:''});renderEdit()};
+m.querySelector('#addPlayerKit').onclick=()=>{
+ p.combos=p.combos||[];
+ let available=data.kits.find(k=>!p.combos.some(c=>c.kit===k.name));
+ if(!available){alert('All kits are already added. Edit the existing kit rows instead.');return}
+ p.combos.push({kit:available.name,tier:''});renderEdit();
+};
 m.querySelector('#saveEdit').onclick=()=>{
  let n=m.querySelector('#epn').value.trim();if(!n)return alert('Enter player name.');
  p.name=n;p.rank=m.querySelector('#epr').value;p.points=+m.querySelector('#epp').value||0;p.region=m.querySelector('#epg').value;
