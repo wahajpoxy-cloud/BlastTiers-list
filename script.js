@@ -30,10 +30,10 @@ function renderRows(filter='Overall'){
        <div><div class="pname">${esc(p.name)}</div><div class="meta">◆ ${esc(p.rank)} (${+p.points||0} points)</div></div>
      </div>
      <div class="region">${esc(p.region)}</div>
-     <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div>
+     <div class="combos">${combos||'<span class="muted">No tiers</span>'}</div><div class="row-actions"><button type="button" class="btn edit-player" data-edit="${esc(p.id)}">Edit</button></div>
    </div>`;
  }).join('');
- rows.querySelectorAll('.player-row').forEach(r=>r.onclick=()=>profile(r.dataset.player));
+ rows.querySelectorAll('.player-row').forEach(r=>r.onclick=e=>{if(e.target.closest('.row-actions'))return;profile(r.dataset.player)}); rows.querySelectorAll('.edit-player').forEach(b=>b.onclick=e=>{e.stopPropagation();editPlayer(b.dataset.edit)});
 }
 
 function kitSlug(n){return ({'LTMs':'ltms','NethOP':'nethop','Diamond SMP':'diamond-smp','SpearMace':'spearmace'}[n]||n.toLowerCase().replace(/\s+/g,'-'))}

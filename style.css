@@ -161,3 +161,17 @@ a{text-decoration:none;color:inherit}.wrap{max-width:1380px;margin:auto;padding:
 }
 
 .kit-tabs-home{margin:18px 0 4px;padding:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}.kit-tabs-home .tab{flex:0 0 105px;text-decoration:none;text-align:center}.kit-tabs-home .tab img{width:44px;height:44px}.kit-tabs-home .tab:hover{border-color:#2878b5;color:#fff;background:#102438}.kit-tabs-home .tab span{display:block;margin-top:3px}
+
+/* Edit button + delete inside Edit Player */
+.player-row{grid-template-columns:45px minmax(280px,1.15fr) 70px minmax(420px,2fr) 80px!important}
+.row-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important}
+.row-actions .edit-player{display:inline-flex!important;background:#102a42;border-color:#2b638d;color:#a9d8ff}
+.full-delete{width:100%;margin-top:18px;justify-content:center}
+.edit-title{margin:20px 0 8px}
+.kit-tier-head{display:grid;grid-template-columns:1fr 125px 38px;gap:8px;color:#7890a6;font-size:12px;font-weight:800;text-transform:uppercase;margin:12px 0 5px}
+.edit-combo{display:grid;grid-template-columns:1fr 125px 38px;gap:8px;align-items:center;margin-bottom:8px}
+.edit-combo select,.edit-combo input{width:100%;box-sizing:border-box}
+@media(max-width:950px){
+ .player-row{grid-template-columns:35px 1fr 55px!important}
+ .combos{grid-column:2/-1!important}.row-actions{grid-column:2/-1!important;justify-content:flex-end!important}
+}
