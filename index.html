@@ -1,29 +1,281 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>BlastTier — Minecraft PvP Tier Rankings</title><link rel="stylesheet" href="./style.css?v=20260831"></head>
-<body data-kit="overall">
-<header class="topbar">
-  <a class="brand" href="index.html"><span class="brand-mark">BT</span><span>BLAST<span class="brand-blue">TIER</span></span></a>
-  <nav class="main-nav">
-    <a class="active" href="index.html">Home</a><a href="rankings.html">Rankings</a><a href="chat.html">Chat</a><a href="discords.html">Discords</a><a href="api.html">API</a>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlastTier</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111d;color:#e8f0fa;font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.header{height:72px;margin:8px;border:1px solid #1b2c40;border-radius:15px;background:#0c1622;display:flex;align-items:center;padding:0 18px;gap:30px}
+.logo{font-size:29px;font-weight:900;letter-spacing:-1px;color:#fff}.logo b{color:#168cff}.crown{color:#168cff;font-size:17px}
+.nav{display:flex;gap:8px;align-items:center}.nav button{border:0;background:transparent;color:#7d8ea2;padding:12px 14px;border-radius:9px;font-weight:700}.nav button.active,.nav button:hover{color:#fff;background:#111f2e}
+.search{margin-left:auto;background:#111e2d;border:1px solid #1c2c40;color:#dce8f5;border-radius:25px;padding:11px 16px;width:220px;outline:0}.search:focus{border-color:#167fe1}
+.tabs{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin:52px 8px 0}
+.tab{height:61px;background:#0b151f;border:1px solid #1a2b3d;border-radius:20px 20px 0 0;color:#637489;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;gap:2px}
+.tab .ico{font-size:24px}.tab.active{color:#fff;border-bottom:3px solid #2495ff;background:#0d1925}
+.main{margin:0 8px 18px;border:1px solid #1b2d41;border-radius:0 15px 15px 15px;background:#0b1520;padding:16px}
+.toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:16px}
+.btn{border:1px solid #235078;background:#10243a;color:#dcecff;border-radius:8px;padding:10px 15px;font-weight:800}.btn:hover{background:#14314d}.primary{border-color:#1687ed;background:#0e6dcc}.primary:hover{background:#1682e8}.info{margin-right:auto}
+.table{border:1px solid #1a2b3d;border-radius:12px;overflow:hidden}
+.head{height:54px;display:grid;grid-template-columns:70px 1fr 110px 1.2fr;align-items:center;padding:0 18px;color:#4d9ae4;font-weight:900;background:#0b1520}
+.rows:empty{min-height:370px}
+.empty{min-height:370px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7890a7}.emptyIcon{font-size:76px;filter:drop-shadow(0 0 12px #168cff55)}.empty h2{margin:8px 0 5px;color:#fff}.empty p{margin:0}
+.row{display:grid;grid-template-columns:70px 1fr 110px 1.2fr;align-items:center;min-height:78px;margin:7px;border:1px solid #1b2c3e;border-radius:11px;background:#101c29;padding:7px 10px}
+.rank{font-size:29px;font-weight:900;color:#fff;text-align:center}
+.player{display:flex;align-items:center;gap:12px}.skin{width:64px;height:56px;border-radius:5px;overflow:hidden;background:#172638;border:1px solid #2a4057;display:flex;align-items:center;justify-content:center;font-weight:900}.skin img{width:100%;height:100%;object-fit:cover}.pname{font-size:21px;font-weight:900}.sub{color:#7893ae;margin-top:5px}.sub b{color:#f1bc39}
+.region{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:40px;border-radius:8px;background:#421d2a;color:#ff6680;font-weight:900}.tierbox{display:flex;gap:9px;flex-wrap:wrap}.tierbadge{text-align:center;min-width:46px}.kitcircle{width:38px;height:38px;border:2px solid #2a4157;background:#08111b;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto}.kitcircle svg{width:26px;height:26px}.tiername{font-size:12px;font-weight:900;color:#f0b63b;margin-top:3px}
+.kitsPreview{margin-top:16px;border:1px solid #1b2d41;border-radius:12px;padding:18px}.sectionTitle{text-align:center;color:#168cff;font-size:18px;font-weight:900;margin-bottom:16px}.kitgrid{display:grid;grid-template-columns:repeat(9,1fr);gap:10px}.kitcard{text-align:center;color:#d5e0ec}.kitbig{width:58px;height:58px;border-radius:50%;border:2px solid #263e56;background:#07111b;display:flex;align-items:center;justify-content:center;margin:auto auto 8px}.kitbig svg{width:40px;height:40px}
+.panel{display:none}.panel.show{display:block}
+.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.show{display:flex}.box{width:min(520px,100%);background:#0d1925;border:1px solid #28425c;border-radius:14px;padding:22px;box-shadow:0 20px 70px #0009}.box h2{margin-top:0}.field{margin:12px 0}.field label{display:block;color:#8ea4b9;font-size:13px;font-weight:800;margin-bottom:6px}.field input,.field select{width:100%;background:#08121d;color:#fff;border:1px solid #263b50;border-radius:8px;padding:11px;outline:0}.actions{display:flex;justify-content:flex-end;gap:9px;margin-top:18px}.iconPicker{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.iconPick{height:58px;background:#08121d;border:1px solid #263b50;border-radius:8px;color:#9eb0c2}.iconPick.selected{border-color:#168cff;box-shadow:0 0 0 1px #168cff;background:#102b45}.chat{border:1px solid #1b2d41;border-radius:12px;padding:18px}.messages{height:420px;overflow:auto;background:#07111b;border:1px solid #1b2d41;border-radius:10px;padding:12px}.msg{background:#122133;border:1px solid #223a53;padding:10px;border-radius:8px;margin-bottom:8px}.chatbar{display:flex;gap:8px;margin-top:10px}.chatbar input{flex:1;background:#08121d;color:#fff;border:1px solid #263b50;border-radius:8px;padding:11px}
+@media(max-width:900px){.tabs{grid-template-columns:repeat(5,1fr)}.kitgrid{grid-template-columns:repeat(5,1fr)}.head,.row{grid-template-columns:50px 1fr 70px}.head div:last-child,.row .tierbox{grid-column:2/-1}.search{width:160px}.nav .optional{display:none}}
+
+.embedded-logo{display:inline-flex;align-items:center;justify-content:center}.embedded-logo svg{width:100%;height:100%;display:block}.tab .ico{width:30px;height:30px;display:flex;align-items:center;justify-content:center}.tab .ico svg{width:28px;height:28px;display:block}.iconPick svg{width:30px;height:30px;display:inline-block;vertical-align:middle}.kitbig svg{width:40px;height:40px;display:block}.kitcircle svg{width:26px;height:26px;display:block}
+.iconPick svg{width:30px;height:30px;display:inline-block;vertical-align:middle}
+.kitbig svg{width:40px;height:40px;display:block}
+.kitcircle svg{width:26px;height:26px;display:block}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+  <div class="logo">BLAST<span>TIER</span><sup class="crown">◆</sup></div>
+  <nav class="nav">
+    <button class="active" onclick="page('rankings',this)">⌂ Home</button>
+    <button onclick="page('rankings',this)">🏆 Rankings</button>
+    <button onclick="page('chat',this)">💬 Chat</button>
+    <button class="optional">🎮 Discords⌄</button>
+    <button class="optional">▤ API Docs</button>
   </nav>
-  <div class="top-actions"><a class="discord-btn" href="https://discord.com/channels/1542876261544890390/1542898896811069623" target="_blank" rel="noopener">Discord</a><button class="icon-btn" id="mobileMenu" type="button">☰</button></div>
+  <input id="search" class="search" placeholder="Search player...">
 </header>
-<main>
-<section class="hero">
-  <div class="hero-copy"><div class="eyebrow">MINECRAFT PVP TIER LIST</div><h1>Prove your skill.<br><span>Earn your tier.</span></h1><p>BlastTier is a community ranking hub for Minecraft PvP players. Explore kits, compare players and build your own tier profile.</p>
-  <div class="hero-buttons"><a class="primary-btn" href="rankings.html">View Rankings <span>→</span></a><button class="secondary-btn" type="button" data-open="playerModal">＋ Add Player</button></div>
-  <div class="hero-stats"><div><strong id="statPlayers">0</strong><small>Players</small></div><div><strong>9</strong><small>Kits</small></div><div><strong>5</strong><small>Combat Ranks</small></div></div></div>
-  <div class="hero-panel"><div class="panel-top"><span>BLASTTIER</span><b>LIVE RANKINGS</b></div><div class="rank-card featured"><span class="rank-num">#1</span><div class="mini-avatar">BT</div><div class="rank-info"><b id="heroPlayer">No players yet</b><small>Build the leaderboard</small></div><strong>—</strong></div><div class="rank-card"><span class="rank-num">#2</span><div class="mini-avatar">BT</div><div class="rank-info"><b>Ready for you</b><small>Add your first player</small></div><strong>—</strong></div><div class="rank-card"><span class="rank-num">#3</span><div class="mini-avatar">BT</div><div class="rank-info"><b>Community tiers</b><small>Kit-based rankings</small></div><strong>—</strong></div><a class="panel-link" href="rankings.html">Open full leaderboard →</a></div>
-</section>
-<section class="section kits-section"><div class="section-heading"><div><div class="eyebrow">CHOOSE YOUR BATTLEFIELD</div><h2>Explore Kits</h2></div><a href="rankings.html">All rankings →</a></div>
-<div class="kit-grid">
-<a class="kit-card" href="ltms.html"><img src="assets/ltms.png"><span>LTMs</span><small>Limited Time Modes</small></a><a class="kit-card" href="vanilla.html"><img src="assets/vanilla.png"><span>Vanilla</span><small>Classic PvP</small></a><a class="kit-card" href="uhc.html"><img src="assets/uhc.png"><span>UHC</span><small>Ultra Hardcore</small></a><a class="kit-card" href="pot.html"><img src="assets/pot.png"><span>Pot</span><small>Pot PvP</small></a><a class="kit-card" href="nethop.html"><img src="assets/nethop.png"><span>NethOP</span><small>Nether Combat</small></a><a class="kit-card" href="smp.html"><img src="assets/smp.png"><span>SMP</span><small>SMP PvP</small></a><a class="kit-card" href="sword.html"><img src="assets/sword.png"><span>Sword</span><small>Sword PvP</small></a><a class="kit-card" href="axe.html"><img src="assets/axe.png"><span>Axe</span><small>Axe PvP</small></a><a class="kit-card" href="mace.html"><img src="assets/mace.png"><span>Mace</span><small>Mace PvP</small></a></div></section>
-<section class="section how-section"><div class="section-heading"><div><div class="eyebrow">HOW IT WORKS</div><h2>Build the leaderboard</h2></div></div><div class="steps"><div><b>01</b><h3>Add a player</h3><p>Enter their name, combat rank, skin and points.</p></div><div><b>02</b><h3>Choose kit tiers</h3><p>Assign HT1–HT5 style tiers to each kit.</p></div><div><b>03</b><h3>Rank & compare</h3><p>Players automatically appear in the rankings.</p></div></div></section>
-<section class="community"><div><div class="eyebrow">JOIN THE COMMUNITY</div><h2>Talk PvP. Share tiers. Improve.</h2><p>Join the BlastTier Discord and help shape the rankings.</p></div><a class="primary-btn" href="https://discord.com/channels/1542876261544890390/1542898896811069623" target="_blank" rel="noopener">Open Discord →</a></section>
+
+<div id="rankings" class="panel show">
+<section class="tabs" id="tabs"></section>
+<main class="main">
+  <div class="toolbar">
+    <button class="btn info">ⓘ Information</button>
+    <button class="btn primary" onclick="openModal('player')">＋ Add Player</button>
+    <button class="btn primary" onclick="openModal('tier')">＋ Add Tier</button>
+    <button class="btn primary" onclick="openModal('kit')">＋ Add Kit</button>
+  </div>
+  <div class="table">
+    <div class="head"><div>#</div><div>PLAYER</div><div>REGION</div><div>TIERS</div></div>
+    <div id="rows" class="rows"></div>
+  </div>
+  <div class="kitsPreview">
+    <div class="sectionTitle">KIT ICONS</div>
+    <div id="kitGrid" class="kitgrid"></div>
+  </div>
 </main>
-<footer><span>© 2026 BlastTier</span><span>Minecraft PvP Community Rankings</span></footer>
-<div class="modal" id="playerModal"><div class="modal-box"><button class="modal-x" type="button" data-close="playerModal">×</button><div class="eyebrow">PLAYER PROFILE</div><h2>Add Player</h2><form id="playerForm"><div class="field"><label>Player Name</label><input id="playerName" required maxlength="24" placeholder="Player name"></div><div class="form-grid"><div class="field"><label>Player Tier</label><select id="playerTier"><option value="">No player tier</option></select></div><div class="field"><label>Combat Rank</label><select id="playerRank"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></div></div><div class="form-grid"><div class="field"><label>Points</label><input id="playerPoints" type="number" min="0" value="0"></div><div class="field"><label>Region</label><select id="playerRegion"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></div></div><div class="field"><label>Skin</label><input id="playerSkin" type="file" accept="image/*"><small class="hint">Optional · max 3 MB</small></div><div class="kit-add"><label>Kit + Tier</label><div class="form-grid"><select id="comboKit"></select><select id="comboTier"></select></div><button class="secondary-btn small" type="button" id="addComboBtn">＋ Add Kit Tier</button><div id="chosen" class="chosen"></div></div><div class="form-actions"><button class="secondary-btn" type="button" data-close="playerModal">Cancel</button><button class="primary-btn" type="submit">Add Player</button></div></form></div></div>
-<div class="modal" id="tierModal"><div class="modal-box small-modal"><button class="modal-x" type="button" data-close="tierModal">×</button><div class="eyebrow">RANKING SETUP</div><h2>Add Tier</h2><form id="addTierForm"><div class="field"><label>Tier Name</label><input id="tierName" placeholder="HT1" required></div><div class="field"><label>Kit</label><select id="tierKit"></select></div><button class="primary-btn full" type="submit">Add Tier</button></form></div></div>
-<div class="modal" id="kitModal"><div class="modal-box small-modal"><button class="modal-x" type="button" data-close="kitModal">×</button><div class="eyebrow">KIT MANAGEMENT</div><h2>Add Kit</h2><form id="addKitForm"><div class="field"><label>Kit Name</label><input id="kitName" placeholder="Crystal" required></div><button class="primary-btn full" type="submit">Add Kit</button></form></div></div>
-<script src="./script.js?v=20260831"></script></body></html>
+</div>
+
+<div id="chat" class="panel">
+<main class="main">
+  <div class="chat">
+    <h2>BlastTier Chat</h2>
+    <div id="messages" class="messages"></div>
+    <div class="chatbar"><input id="chatInput" placeholder="Write a message..." onkeydown="if(event.key==='Enter')sendChat()"><button class="btn primary" onclick="sendChat()">Send</button></div>
+  </div>
+</main>
+</div>
+</div>
+
+<div id="playerModal" class="modal"><div class="box">
+<h2>Add Player</h2>
+<div class="field"><label>Player name</label><input id="pn" placeholder="Minecraft username"></div>
+<div class="field"><label>Player rank</label><select id="prank"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></div>
+<div class="field"><label>Points</label><input id="pp" type="number" min="0" value="0"></div>
+<div class="field"><label>Region</label><select id="preg"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></div>
+<div class="field"><label>Tier</label><select id="ptier"></select></div>
+<div class="field"><label>Player skin</label><input id="pskin" type="file" accept="image/png,image/jpeg,image/webp"></div>
+<div class="actions"><button class="btn" onclick="closeModals()">Cancel</button><button class="btn primary" onclick="addPlayer()">Add Player</button></div>
+</div></div>
+
+<div id="kitModal" class="modal"><div class="box">
+<h2>Add Kit</h2>
+<div class="field"><label>Kit name</label><input id="kname" placeholder="e.g. Sword"></div>
+<div class="field"><label>Kit logo</label><div id="iconPicker" class="iconPicker"></div></div>
+<div class="actions"><button class="btn" onclick="closeModals()">Cancel</button><button class="btn primary" onclick="addKit()">Add Kit</button></div>
+</div></div>
+
+<div id="tierModal" class="modal"><div class="box">
+<h2>Add Tier</h2>
+<div class="field"><label>Tier name</label><input id="tname" placeholder="e.g. HT1"></div>
+<div class="field"><label>Kit</label><select id="tkit"></select></div>
+<div class="actions"><button class="btn" onclick="closeModals()">Cancel</button><button class="btn primary" onclick="addTier()">Add Tier</button></div>
+</div></div>
+
+<script>
+(function(){
+"use strict";
+
+var STORAGE_PLAYERS="blasttier_players_v2";
+var STORAGE_TIERS="blasttier_tiers_v2";
+var STORAGE_KITS="blasttier_kits_v2";
+
+var DEFAULT_KITS=[
+ ["Overall","overall"],["LTMs","ltms"],["Vanilla","vanilla"],["UHC","uhc"],
+ ["Pot","pot"],["NethOP","nethop"],["SMP","smp"],["Sword","sword"],["Axe","axe"],["Mace","mace"]
+];
+
+var players=load("players",[]);
+var tiers=load("tiers",[]);
+var kits=load("kits",DEFAULT_KITS.slice());
+var selectedLogo="sword";
+
+function load(type,fallback){
+ try{
+  var key=type==="players"?STORAGE_PLAYERS:type==="tiers"?STORAGE_TIERS:STORAGE_KITS;
+  var x=JSON.parse(localStorage.getItem(key));
+  return Array.isArray(x)?x:fallback.slice();
+ }catch(e){return fallback.slice();}
+}
+function saveAll(){
+ try{
+  localStorage.setItem(STORAGE_PLAYERS,JSON.stringify(players));
+  localStorage.setItem(STORAGE_TIERS,JSON.stringify(tiers));
+  localStorage.setItem(STORAGE_KITS,JSON.stringify(kits));
+ }catch(e){console.warn(e);}
+}
+function esc(v){
+ return String(v==null?"":v).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+ });
+}
+
+function page(id,btn){
+ document.querySelectorAll("nav button").forEach(function(x){x.classList.remove("active");});
+ if(btn)btn.classList.add("active");
+ var app=document.getElementById("app");
+ if(!app)return;
+ if(id==="home")app.innerHTML=home();
+ else if(id==="rankings")app.innerHTML=ranking();
+ else if(id==="players")app.innerHTML=playersPage();
+ else if(id==="chat")app.innerHTML=chatPage();
+ else if(id==="addplayer")app.innerHTML=addPlayer();
+ else if(id==="addkit")app.innerHTML=addKit();
+ else if(id==="addtier"){app.innerHTML=addTier();setTimeout(fillTierKits,0);}
+}
+
+function home(){
+ return '<div class="pageTitle"><h1>BlastTier</h1><p class="muted">Competitive Minecraft PvP tier rankings.</p></div>'+
+ '<section class="cards"><div class="card"><b>⚔️</b><h3>10 Kits</h3><p>Overall, LTMs, Vanilla, UHC, Pot, NethOP, SMP, Sword, Axe and Mace.</p></div>'+
+ '<div class="card"><b>👤</b><h3>Players</h3><p>Browse players, skins, ranks and kit tiers.</p></div>'+
+ '<div class="card"><b>🏆</b><h3>Rankings</h3><p>View players ordered by competitive points.</p></div></section>';
+}
+function playerCards(){
+ if(!players.length)return '<div class="empty"><strong>🏆</strong><h2>No players yet!</h2><p>Add a player to start BlastTier rankings.</p></div>';
+ return players.slice().sort(function(a,b){return (b.score||0)-(a.score||0);}).map(function(p,i){
+  return '<div class="player"><div class="place">'+(i+1)+'.</div><div class="skin">'+
+  (p.skin?'<img src="'+esc(p.skin)+'" alt="">':'')+'</div><div><div class="name">'+esc(p.name)+'</div>'+
+  '<div class="meta">◆ '+esc(p.title||"Player")+' ('+(Number(p.score)||0)+' points)'+
+  (p.playerTier?' • '+esc(p.playerTier):'')+'</div></div><div class="region">'+esc(p.region||"NA")+
+  '</div><div class="combos">'+(p.t||[]).map(function(x,j){return '<div class="combo"><span>'+esc(kits[j]?kits[j][0]:"Kit")+
+  '<br><b class="tier">'+esc(x||"—")+'</b></span></div>';}).join("")+
+  '</div><button type="button" class="btn red" data-delete-player="'+esc(p.id)+'">Delete</button></div>';
+ });
+}
+function ranking(){
+ return '<div class="pageTitle"><h1>Rankings</h1><p class="muted">Top BlastTier players.</p></div><div id="rows">'+playerCards()+'</div>';
+}
+function playersPage(){
+ return '<div class="pageTitle"><h1>Players</h1><p class="muted">Minecraft skins and competitive results.</p></div><div id="rows">'+playerCards()+'</div>';
+}
+function chatPage(){
+ return '<div class="chat"><h2>BlastTier Chat</h2><div id="messages" class="messages"></div><div class="chatbar"><input id="chatInput" placeholder="Write a message..."><button type="button" class="btn blue" id="sendChatBtn">Send</button></div></div>';
+}
+function addPlayer(){
+ var tierOptions=tiers.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join("");
+ var kitFields=kits.slice(0,10).map(function(k,i){return '<label>'+esc(k[0])+'<input id="tier'+i+'" placeholder="HT1"></label>';}).join("");
+ return '<div class="form"><h1>Add Player</h1><p class="muted">Add a player to BlastTier.</p>'+
+ '<label>Player name<input id="playerName" placeholder="Minecraft username"></label>'+
+ '<label>Player skin URL<input id="playerSkin" placeholder="https://mc-heads.net/body/PlayerName/100.png"></label>'+
+ '<label>Region<select id="playerRegion"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></label>'+
+ '<label>Combat rank<select id="playerTitle"><option>Combat Grandmaster</option><option>Combat Ace</option><option>Combat Master</option><option>Combat Specialist</option><option>Combat Apprentice</option></select></label>'+
+ '<label>Player tier<select id="playerTier"><option value="">No overall tier</option>'+tierOptions+'</select></label>'+
+ '<label>Points<input id="playerScore" type="number" min="0" value="0"></label>'+
+ '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+kitFields+'</div>'+
+ '<button type="button" class="btn blue" id="savePlayerBtn">Add Player</button><p id="msg" class="muted"></p></div>';
+}
+function addKit(){
+ return '<div class="form"><h1>Add Kit</h1><p class="muted">Add a kit to BlastTier.</p>'+
+ '<label>Kit name<input id="newKit" placeholder="Crystal"></label>'+
+ '<label>Kit logo<input id="newIcon" placeholder="sword"></label>'+
+ '<button type="button" class="btn blue" id="saveKitBtn">Add Kit</button><p id="msg" class="muted"></p></div>';
+}
+function addTier(){
+ return '<div class="form"><h1>Add Tier</h1><p class="muted">Create a tier for a kit.</p>'+
+ '<label>Kit<select id="tierKit"></select></label>'+
+ '<label>Tier name<input id="tierName" placeholder="HT1"></label>'+
+ '<button type="button" class="btn blue" id="saveTierBtn">Add Tier</button><p id="msg" class="muted"></p></div>';
+}
+function fillTierKits(){
+ var e=document.getElementById("tierKit");if(!e)return;
+ e.innerHTML=kits.map(function(k){return '<option value="'+esc(k[0])+'">'+esc(k[0])+'</option>';}).join("");
+}
+function savePlayer(){
+ var n=document.getElementById("playerName"),msg=document.getElementById("msg");
+ if(!n||!n.value.trim()){if(msg)msg.textContent="Enter a player name.";return;}
+ var name=n.value.trim();
+ if(players.some(function(p){return p.name.toLowerCase()===name.toLowerCase();})){if(msg)msg.textContent="Player already exists.";return;}
+ var p={id:String(Date.now())+Math.random(),name:name,
+ region:document.getElementById("playerRegion").value,title:document.getElementById("playerTitle").value,
+ score:Number(document.getElementById("playerScore").value)||0,
+ playerTier:document.getElementById("playerTier").value,
+ skin:document.getElementById("playerSkin").value.trim()||("https://mc-heads.net/body/"+encodeURIComponent(name)+"/100.png"),
+ t:kits.map(function(_,i){var e=document.getElementById("tier"+i);return e&&e.value.trim()?e.value.trim():"—";})};
+ players.push(p);saveAll();if(msg)msg.textContent=name+" added successfully.";setTimeout(function(){page("rankings");},300);
+}
+function saveKit(){
+ var n=document.getElementById("newKit"),msg=document.getElementById("msg");
+ if(!n||!n.value.trim()){if(msg)msg.textContent="Enter kit name.";return;}
+ var name=n.value.trim();
+ if(kits.some(function(k){return k[0].toLowerCase()===name.toLowerCase();})){if(msg)msg.textContent="Kit already exists.";return;}
+ var icon=(document.getElementById("newIcon").value.trim()||"sword").toLowerCase();
+ kits.push([name,icon]);saveAll();if(msg)msg.textContent="Kit added successfully.";
+}
+function saveTier(){
+ var k=document.getElementById("tierKit"),t=document.getElementById("tierName"),msg=document.getElementById("msg");
+ if(!k||!t||!t.value.trim()){if(msg)msg.textContent="Choose a kit and enter a tier.";return;}
+ var value=t.value.trim(),key=k.value+"|"+value;
+ if(tiers.some(function(x){return x===key;})){if(msg)msg.textContent="That tier already exists.";return;}
+ tiers.push(key);saveAll();if(msg)msg.textContent=value+" added to "+k.value+".";
+}
+function loadChat(){
+ var e=document.getElementById("messages");if(!e)return;
+ var a=[];try{a=JSON.parse(localStorage.getItem("btchat")||"[]");}catch(x){}
+ if(!a.length)a=[{n:"BlastTier",t:"Welcome to the BlastTier community chat!"}];
+ e.innerHTML=a.map(function(m){return '<div class="msg"><b>'+esc(m.n)+'</b><div>'+esc(m.t)+'</div></div>';}).join("");
+}
+function sendChat(){
+ var i=document.getElementById("chatInput");if(!i||!i.value.trim())return;
+ var a=[];try{a=JSON.parse(localStorage.getItem("btchat")||"[]");}catch(x){}
+ a.push({n:"You",t:i.value.trim()});localStorage.setItem("btchat",JSON.stringify(a));i.value="";loadChat();
+}
+document.addEventListener("click",function(e){
+ var el=e.target.closest("[data-delete-player]");
+ if(el){
+  var id=el.getAttribute("data-delete-player");
+  players=players.filter(function(p){return String(p.id)!==String(id);});saveAll();
+  var rows=document.getElementById("rows");if(rows)rows.innerHTML=playerCards();
+ }
+ if(e.target.id==="savePlayerBtn")savePlayer();
+ if(e.target.id==="saveKitBtn")saveKit();
+ if(e.target.id==="saveTierBtn")saveTier();
+ if(e.target.id==="sendChatBtn")sendChat();
+});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="chatInput")sendChat();});
+document.addEventListener("DOMContentLoaded",function(){
+ document.querySelectorAll("nav button").forEach(function(b){
+  b.addEventListener("click",function(){var p=b.getAttribute("data-page");if(p)page(p,b);});
+ });
+ page("home",document.querySelector('nav button[data-page="home"]'));
+});
+})();
+</script>
+</body>
+</html>
