@@ -1,6 +1,6 @@
-BlastTier upgraded build.
-Existing kit/logo assets were NOT changed.
-No players are pre-added.
-Buttons and JavaScript upgraded: Add Player, Skin, Kit+Tier, Delete, Add Tier, Add Kit, Search and Chat.
-Keep assets/ beside the HTML files.
-Upload the whole folder to GitHub Pages.
+BLASTTIER GITHUB PAGES
+
+Upload ALL files and the assets folder to the same GitHub repository.
+Keep index.html, style.css, script.js and assets/ at the repository root.
+The Add Player, Add Tier, Add Kit and Delete buttons use local browser storage and work on GitHub Pages.
+Discord channel: https://discord.com/channels/1542876261544890390/1542898896811069623
