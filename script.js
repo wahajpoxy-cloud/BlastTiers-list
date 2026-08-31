@@ -3,6 +3,12 @@ const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],[
 const KEY='blasttier_final_v6';
 let data=JSON.parse(localStorage.getItem(KEY)||'null');
 if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
+// Restore any missing kit tabs without replacing existing asset icons or player data.
+if(!Array.isArray(data.kits)) data.kits=[];
+KIT_DEFAULT.slice(1).forEach(([name,icon])=>{
+  if(!data.kits.some(k=>k.name===name)) data.kits.push({name,icon});
+});
+
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function kitByName(n){return data.kits.find(k=>k.name===n)}
