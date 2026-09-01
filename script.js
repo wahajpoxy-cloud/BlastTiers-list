@@ -1,40 +1,8 @@
 
 const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],['UHC','uhc'],['Pot','pot'],['NethOP','nethop'],['SMP','smp'],['Diamond SMP','diamond-smp'],['Sword','sword'],['Axe','axe'],['Mace','mace'],['Cart','cart'],['SpearMace','spearmace']];
 const KEY='blasttier_final_v6';
-const DEFAULT_KITS=KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]}));
-function loadData(){
-  let current=null;
-  try{current=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){current=null}
-  // Recover an existing player database saved by an earlier BlastTier build.
-  // Never replace a populated database with an empty/default one.
-  if(!current || !Array.isArray(current.players) || current.players.length===0){
-    let best=null;
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(!k || k===KEY) continue;
-      try{
-        const v=JSON.parse(localStorage.getItem(k)||'null');
-        if(v && Array.isArray(v.players) && v.players.length>0 && Array.isArray(v.kits)){
-          if(!best || v.players.length>best.players.length) best=v;
-        }
-      }catch(e){}
-    }
-    if(best) current=best;
-  }
-  if(!current) current={players:[],kits:[],tiers:[],messages:[]};
-  if(!Array.isArray(current.players)) current.players=[];
-  if(!Array.isArray(current.kits)) current.kits=[];
-  if(!Array.isArray(current.tiers)) current.tiers=[];
-  if(!Array.isArray(current.messages)) current.messages=[];
-  // Keep all built-in kit tabs available without touching player data.
-  for(const dk of DEFAULT_KITS){
-    if(!current.kits.some(k=>String(k.name).toLowerCase()===dk.name.toLowerCase())) current.kits.push({...dk});
-  }
-  return current;
-}
-let data=loadData();
-// Persist only after loading/migrating so the recovered database survives refreshes.
-try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
+let data=JSON.parse(localStorage.getItem(KEY)||'null');
+if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function kitByName(n){return data.kits.find(k=>k.name===n)}
@@ -169,7 +137,6 @@ function addKit(){let m=modal(`<button class="close">×</button><h2>Add Kit</h2>
 function kitPage(){
  let b=$('#kitRows'); if(!b)return;
  const name=document.title.split(' — ')[0].trim();
- if(!Array.isArray(data.players)){b.innerHTML='<div class="empty"><h2>No player data</h2></div>';return;}
  const list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name));
  const tierNum=t=>{const m=String(t||'').match(/(?:HT|LT)?\s*(\d+)/i);return m?Math.max(1,Math.min(10,parseInt(m[1],10))):99};
  const groups={1:[],2:[],3:[],4:[],5:[]};
@@ -195,6 +162,41 @@ function kitPage(){
  }).join('')}</div></div>`;
  b.querySelectorAll('[data-player]').forEach(r=>r.onclick=()=>profile(r.dataset.player));
 }
-setupGlobalSearch();
 
-});
+function setupGlobalSearch(){
+  const input=document.querySelector('#globalSearch');
+  if(!input)return;
+  let box=document.querySelector('.search-results');
+  if(!box){box=document.createElement('div');box.className='search-results';document.body.appendChild(box)}
+  const draw=()=>{
+    const q=input.value.trim().toLowerCase();
+    if(!q){box.classList.remove('show');box.innerHTML='';return}
+    const matches=data.players.filter(p=>String(p.name||'').toLowerCase().includes(q)).slice(0,8);
+    box.innerHTML=matches.length?matches.map(p=>`<div class="search-result">
+      <div class="search-result-main" data-search-profile="${esc(p.id)}"><strong>${esc(p.name)}</strong><span>${esc(p.rank)} • ${esc(p.region)} • ${+p.points||0} points</span></div>
+      <div class="search-result-actions"><button type="button" class="btn" data-search-edit="${esc(p.id)}">Edit</button></div>
+    </div>`).join(''):`<div class="search-empty">No players found.</div>`;
+    box.classList.add('show');
+    box.querySelectorAll('[data-search-profile]').forEach(x=>x.onclick=()=>{box.classList.remove('show');profile(x.dataset.searchProfile)});
+    box.querySelectorAll('[data-search-edit]').forEach(x=>x.onclick=e=>{e.stopPropagation();box.classList.remove('show');editPlayer(x.dataset.searchEdit)});
+  };
+  input.addEventListener('input',draw);
+  input.addEventListener('focus',draw);
+  document.addEventListener('click',e=>{if(e.target!==input&&!box.contains(e.target))box.classList.remove('show')});
+}
+
+function init(){
+  tabs();
+  renderRows(document.querySelector('.tab.active')?.dataset.kit||'Overall');
+  renderHomeKits();
+  if(document.querySelector('#kitRows')) kitPage();
+  const add=document.querySelector('#addPlayerBtn');
+  if(add)add.onclick=addPlayer;
+  const addKitBtn=document.querySelector('#addKitBtn');
+  if(addKitBtn)addKitBtn.onclick=addKit;
+  const addTierBtn=document.querySelector('#addTierBtn');
+  if(addTierBtn)addTierBtn.onclick=addTier;
+  setupGlobalSearch();
+}
+
+document.addEventListener('DOMContentLoaded',init);
