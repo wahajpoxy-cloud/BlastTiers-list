@@ -1,8 +1,40 @@
 
 const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],['UHC','uhc'],['Pot','pot'],['NethOP','nethop'],['SMP','smp'],['Diamond SMP','diamond-smp'],['Sword','sword'],['Axe','axe'],['Mace','mace'],['Cart','cart'],['SpearMace','spearmace']];
 const KEY='blasttier_final_v6';
-let data=JSON.parse(localStorage.getItem(KEY)||'null');
-if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
+const DEFAULT_KITS=KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]}));
+function loadData(){
+  let current=null;
+  try{current=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){current=null}
+  // Recover an existing player database saved by an earlier BlastTier build.
+  // Never replace a populated database with an empty/default one.
+  if(!current || !Array.isArray(current.players) || current.players.length===0){
+    let best=null;
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(!k || k===KEY) continue;
+      try{
+        const v=JSON.parse(localStorage.getItem(k)||'null');
+        if(v && Array.isArray(v.players) && v.players.length>0 && Array.isArray(v.kits)){
+          if(!best || v.players.length>best.players.length) best=v;
+        }
+      }catch(e){}
+    }
+    if(best) current=best;
+  }
+  if(!current) current={players:[],kits:[],tiers:[],messages:[]};
+  if(!Array.isArray(current.players)) current.players=[];
+  if(!Array.isArray(current.kits)) current.kits=[];
+  if(!Array.isArray(current.tiers)) current.tiers=[];
+  if(!Array.isArray(current.messages)) current.messages=[];
+  // Keep all built-in kit tabs available without touching player data.
+  for(const dk of DEFAULT_KITS){
+    if(!current.kits.some(k=>String(k.name).toLowerCase()===dk.name.toLowerCase())) current.kits.push({...dk});
+  }
+  return current;
+}
+let data=loadData();
+// Persist only after loading/migrating so the recovered database survives refreshes.
+try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function kitByName(n){return data.kits.find(k=>k.name===n)}
@@ -134,32 +166,34 @@ refreshAddKitButton();
 }
 function addTier(){let m=modal(`<button class="close">×</button><h2>Add Tier</h2><div class="form"><label>Tier name</label><input id="tn" placeholder="HT1"><label>Kit</label><select id="tk">${data.kits.map(k=>`<option>${esc(k.name)}</option>`).join('')}</select><div class="form-actions"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="add">Add Tier</button></div></div>`);m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancel').onclick=()=>m.remove();m.querySelector('#add').onclick=()=>{let n=$('#tn').value.trim(),k=$('#tk').value;if(!n)return alert('Enter tier name.');data.tiers.push({name:n,kit:k});save();m.remove()}}
 function addKit(){let m=modal(`<button class="close">×</button><h2>Add Kit</h2><div class="form"><label>Kit name</label><input id="kn" placeholder="Crystal"><label>Choose icon</label><div id="icons" class="icon-picker">${data.kits.map(k=>k.icon).filter((v,i,a)=>a.indexOf(v)===i).concat(['sword','axe','mace','pot','uhc','vanilla','ltms','nethop','smp','cart','spearmace','diamond-smp']).filter((v,i,a)=>a.indexOf(v)===i).map(k=>`<button type="button" class="icon-pick" data-icon="${k}"><img src="assets/${k}.png"></button>`).join('')}</div><div class="form-actions"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="add">Add Kit</button></div></div>`);let selected='sword';m.querySelectorAll('.icon-pick').forEach(b=>b.onclick=()=>{selected=b.dataset.icon;m.querySelectorAll('.icon-pick').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancel').onclick=()=>m.remove();m.querySelector('#add').onclick=()=>{let n=$('#kn').value.trim();if(!n)return alert('Enter kit name.');if(data.kits.some(k=>k.name.toLowerCase()===n.toLowerCase()))return alert('Kit already exists.');data.kits.push({name:n,icon:selected});save();m.remove();tabs();renderRows()}}
-function kitPage(){let b=$('#kitRows');if(!b)return;let name=document.title.split(' — ')[0];let list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name)).sort((a,b)=>(+b.points||0)-(+a.points||0));b.innerHTML=list.length?list.map((p,i)=>`<div class="player-row" data-player="${p.id}"><div class="place">${i+1}.</div><div class="player-info"><div class="skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2))}</div><div><div class="pname">${esc(p.name)}</div><div class="meta">${esc(p.rank)} • ${+p.points||0} points</div></div></div><div class="region">${esc(p.region)}</div><div class="combos"><div class="combo"><img src="assets/${kitIcon(name)}.png"><span class="tier">${esc(p.combos.find(c=>c.kit===name).tier)}</span></div></div><div class="row-actions"><button type="button" class="btn edit-row" data-edit="${p.id}">Edit</button></div></div>`).join(''):'<div class="empty"><h2>No players yet</h2><p>No players have been added to this kit.</p></div>';b.querySelectorAll('[data-player]').forEach(r=>r.onclick=e=>{if(!e.target.closest('.row-actions'))profile(r.dataset.player)});b.querySelectorAll('.edit-row').forEach(x=>x.onclick=e=>{e.stopPropagation();editPlayer(x.dataset.edit)})}
-function chatInit(){let b=$('#messages');if(!b)return;function render(){b.innerHTML=data.messages.length?data.messages.map(m=>`<div class="message"><b>${esc(m.name)}</b> <span class="muted">${esc(m.time)}</span><div>${esc(m.text)}</div></div>`).join(''):'<div class="empty">No messages yet.</div>'}render();$('#sendChat').onclick=()=>{let i=$('#chatText'),t=i.value.trim();if(!t)return;data.messages.push({name:'You',text:t,time:new Date().toLocaleTimeString()});i.value='';save();render()}}
-document.addEventListener('DOMContentLoaded',()=>{renderHomeKits();tabs();renderRows();kitPage();chatInit();$('#addPlayerBtn')?.addEventListener('click',addPlayer);function setupGlobalSearch(){
- const input=$('#globalSearch'); if(!input)return;
- let box=document.querySelector('.search-results');
- if(!box){box=document.createElement('div');box.className='search-results';input.parentElement.appendChild(box)}
- const draw=()=>{
-   const q=input.value.trim().toLowerCase();
-   if(!q){box.innerHTML='';box.classList.remove('show');return}
-   const matches=data.players.filter(p=>p.name.toLowerCase().includes(q)).slice(0,8);
-   box.innerHTML=matches.length?matches.map(p=>`<div class="search-result" data-id="${esc(p.id)}">
-     <div class="search-result-main"><strong>${esc(p.name)}</strong><span>${esc(p.region)} • ${esc(p.rank)} • ${+p.points||0} pts</span></div>
-     <div class="search-result-actions">
-       <button type="button" class="btn search-edit" data-edit="${esc(p.id)}">Edit</button>
-       <button type="button" class="btn danger search-delete" data-delete="${esc(p.id)}">Delete</button>
-     </div>
-   </div>`).join(''):'<div class="search-empty">No player found.</div>';
-   box.classList.add('show');
-   box.querySelectorAll('.search-result-main').forEach(x=>x.onclick=()=>{profile(x.parentElement.dataset.id);box.classList.remove('show')});
-   box.querySelectorAll('.search-edit').forEach(b=>b.onclick=e=>{e.stopPropagation();editPlayer(b.dataset.edit);box.classList.remove('show');input.value=''});
-   box.querySelectorAll('.search-delete').forEach(b=>b.onclick=e=>{e.stopPropagation();deletePlayer(b.dataset.delete);draw()});
- };
- input.addEventListener('input',draw);
- input.addEventListener('focus',draw);
- document.addEventListener('click',e=>{if(!input.parentElement.contains(e.target))box.classList.remove('show')});
- input.addEventListener('keydown',e=>{if(e.key==='Escape'){input.value='';box.classList.remove('show')}});
+function kitPage(){
+ let b=$('#kitRows'); if(!b)return;
+ const name=document.title.split(' — ')[0].trim();
+ if(!Array.isArray(data.players)){b.innerHTML='<div class="empty"><h2>No player data</h2></div>';return;}
+ const list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name));
+ const tierNum=t=>{const m=String(t||'').match(/(?:HT|LT)?\s*(\d+)/i);return m?Math.max(1,Math.min(10,parseInt(m[1],10))):99};
+ const groups={1:[],2:[],3:[],4:[],5:[]};
+ list.forEach(p=>{
+   (p.combos||[]).filter(c=>c.kit===name).forEach(c=>{
+     const n=tierNum(c.tier); if(n<=5) groups[n].push({p,c});
+   });
+ });
+ const colors=['gold','silver','bronze','red','gray'];
+ b.innerHTML=`<div class="kit-board-wrap"><div class="kit-board">${[1,2,3,4,5].map((n,i)=>{
+   const arr=groups[n].slice().sort((a,z)=>(+z.p.points||0)-(+a.p.points||0));
+   return `<section class="kit-tier-column tier-col-${n}">
+     <div class="kit-tier-title ${colors[i]}">TIER #${n}</div>
+     <div class="kit-tier-list">${arr.length?arr.map(({p})=>`<div class="kit-player-card" data-player="${esc(p.id)}">
+       <div class="kit-player-left">
+         <div class="kit-player-skin">${p.skin?`<img src="${p.skin}" alt="">`:esc(p.name.slice(0,2).toUpperCase())}</div>
+         <strong>${esc(p.name)}</strong>
+         <span class="up">⌃</span>
+       </div>
+       <span class="kit-region">${esc(p.region)}</span>
+     </div>`).join(''):'<div class="kit-empty">No players</div>'}</div>
+   </section>`;
+ }).join('')}</div></div>`;
+ b.querySelectorAll('[data-player]').forEach(r=>r.onclick=()=>profile(r.dataset.player));
 }
 setupGlobalSearch();
 
