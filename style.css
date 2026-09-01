@@ -334,18 +334,20 @@ body { min-width: 0 !important; }
   .kit-grid { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
 }
 
-/* KIT TAB ONLY — tier board based on the supplied reference image. */
-#kitRows{width:100%;overflow:hidden}
-.kit-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:start;overflow:hidden}
-.kit-tier-column{min-width:0;border:1px solid rgba(255,255,255,.55);background:#090b0d;box-shadow:0 5px 18px rgba(0,0,0,.35)}
-.kit-tier-title{height:52px;display:flex;align-items:center;padding:0 14px;font-size:17px;font-weight:900;color:#151515;background:linear-gradient(180deg,#fffef0,#f3d95c);border-bottom:1px solid rgba(0,0,0,.55);clip-path:polygon(0 0,94% 0,100% 100%,0 100%)}
-.tier-col-2 .kit-tier-title{background:linear-gradient(180deg,#f7fbfd,#aab9c3)}
-.tier-col-3 .kit-tier-title{background:linear-gradient(180deg,#f1c1b4,#a95747)}
-.tier-col-4 .kit-tier-title{color:#fff;background:linear-gradient(180deg,#ff7b91,#79000e)}
-.tier-col-5 .kit-tier-title{background:linear-gradient(180deg,#f5f5f5,#aeb1b5)}
-.kit-tier-list{display:flex;flex-direction:column}
-.kit-player-card{height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 10px;border-bottom:1px solid rgba(255,255,255,.10);cursor:pointer;background:#050607}
-.kit-player-card:hover{filter:brightness(1.18)}
+/* KIT TAB ONLY — reference-style tier board. Other pages/layouts are untouched. */
+#kitRows{width:100%;overflow:visible}
+.kit-board-wrap{width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:4px}
+.kit-board{display:grid;grid-template-columns:repeat(5,minmax(240px,1fr));gap:8px;align-items:start;min-width:1240px}
+.kit-tier-column{min-width:0;border:1px solid rgba(255,255,255,.58);background:#07090b;box-shadow:0 5px 18px rgba(0,0,0,.38)}
+.kit-tier-title{height:52px;display:flex;align-items:center;padding:0 14px;font-size:17px;font-weight:900;color:#151515;border-bottom:1px solid rgba(0,0,0,.65);clip-path:polygon(0 0,94% 0,100% 100%,0 100%)}
+.kit-tier-title.gold{background:linear-gradient(180deg,#fffef0,#f3d95c)}
+.kit-tier-title.silver{background:linear-gradient(180deg,#f7fbfd,#aab9c3)}
+.kit-tier-title.bronze{background:linear-gradient(180deg,#f1c1b4,#a95747)}
+.kit-tier-title.red{color:#fff;background:linear-gradient(180deg,#ff7b91,#79000e)}
+.kit-tier-title.gray{background:linear-gradient(180deg,#f5f5f5,#aeb1b5)}
+.kit-tier-list{display:flex;flex-direction:column;min-height:48px}
+.kit-player-card{height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 8px 0 10px;border-bottom:1px solid rgba(255,255,255,.1);cursor:pointer;background:#050607}
+.kit-player-card:hover{filter:brightness(1.15)}
 .tier-col-1 .kit-player-card:nth-child(odd){background:linear-gradient(90deg,#090909,#1c0e02)}
 .tier-col-2 .kit-player-card:nth-child(odd){background:linear-gradient(90deg,#0d1114,#74818a)}
 .tier-col-3 .kit-player-card:nth-child(odd){background:linear-gradient(90deg,#17100e,#66372c)}
@@ -356,7 +358,7 @@ body { min-width: 0 !important; }
 .kit-player-skin img{width:100%;height:100%;object-fit:cover}
 .kit-player-card strong{font-size:15px;color:#f4f7fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kit-player-card .up{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#73777a;color:#fff;font-weight:900;font-size:17px;flex:0 0 22px}
-.kit-region{font-size:11px;font-weight:1000;padding:5px 6px;border-radius:6px;background:#071f39;color:#55b8ff;border:1px solid #17619b;flex:0 0 auto}
-@media(max-width:1050px){.kit-board{grid-template-columns:repeat(3,minmax(190px,1fr));overflow:auto;padding-bottom:4px}.kit-tier-column{min-width:190px}}
-@media(max-width:700px){.kit-board{grid-template-columns:repeat(2,minmax(180px,1fr))}.kit-tier-column{min-width:180px}.kit-player-card strong{font-size:13px}}
+.kit-region{font-size:11px;font-weight:900;padding:5px 6px;border-radius:6px;background:#071f39;color:#55b8ff;border:1px solid #17619b;flex:0 0 auto}
+.kit-empty{height:48px;display:flex;align-items:center;padding:0 12px;color:#667788;font-size:12px}
 .kit-page-panel{padding:10px!important;background:#07090b!important}
+@media(max-width:700px){.kit-board{min-width:1180px}.kit-player-card strong{font-size:13px}}

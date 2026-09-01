@@ -136,20 +136,30 @@ function addTier(){let m=modal(`<button class="close">×</button><h2>Add Tier</h
 function addKit(){let m=modal(`<button class="close">×</button><h2>Add Kit</h2><div class="form"><label>Kit name</label><input id="kn" placeholder="Crystal"><label>Choose icon</label><div id="icons" class="icon-picker">${data.kits.map(k=>k.icon).filter((v,i,a)=>a.indexOf(v)===i).concat(['sword','axe','mace','pot','uhc','vanilla','ltms','nethop','smp','cart','spearmace','diamond-smp']).filter((v,i,a)=>a.indexOf(v)===i).map(k=>`<button type="button" class="icon-pick" data-icon="${k}"><img src="assets/${k}.png"></button>`).join('')}</div><div class="form-actions"><button class="btn" id="cancel">Cancel</button><button class="btn primary" id="add">Add Kit</button></div></div>`);let selected='sword';m.querySelectorAll('.icon-pick').forEach(b=>b.onclick=()=>{selected=b.dataset.icon;m.querySelectorAll('.icon-pick').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#cancel').onclick=()=>m.remove();m.querySelector('#add').onclick=()=>{let n=$('#kn').value.trim();if(!n)return alert('Enter kit name.');if(data.kits.some(k=>k.name.toLowerCase()===n.toLowerCase()))return alert('Kit already exists.');data.kits.push({name:n,icon:selected});save();m.remove();tabs();renderRows()}}
 function kitPage(){
  let b=$('#kitRows'); if(!b)return;
- let name=document.title.split(' — ')[0];
- let list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name));
+ const name=document.title.split(' — ')[0].trim();
+ const list=data.players.filter(p=>(p.combos||[]).some(c=>c.kit===name));
  const tierNum=t=>{const m=String(t||'').match(/(?:HT|LT)?\s*(\d+)/i);return m?Math.max(1,Math.min(10,parseInt(m[1],10))):99};
- const groups={};
- list.forEach(p=>{const c=(p.combos||[]).find(x=>x.kit===name); if(!c)return; const n=tierNum(c.tier); (groups[n] ||= []).push({p,c});});
- const nums=Object.keys(groups).map(Number).filter(n=>n<99).sort((a,z)=>a-z);
- const cols=nums.length?nums.slice(0,5):[];
- b.innerHTML=cols.length?`<div class="kit-board">${cols.map(n=>{
+ const groups={1:[],2:[],3:[],4:[],5:[]};
+ list.forEach(p=>{
+   (p.combos||[]).filter(c=>c.kit===name).forEach(c=>{
+     const n=tierNum(c.tier); if(n<=5) groups[n].push({p,c});
+   });
+ });
+ const colors=['gold','silver','bronze','red','gray'];
+ b.innerHTML=`<div class="kit-board-wrap"><div class="kit-board">${[1,2,3,4,5].map((n,i)=>{
    const arr=groups[n].slice().sort((a,z)=>(+z.p.points||0)-(+a.p.points||0));
-   return `<section class="kit-tier-column tier-col-${n}"><div class="kit-tier-title">TIER #${n}</div><div class="kit-tier-list">${arr.map(({p,c})=>`<div class="kit-player-card" data-player="${p.id}">
-     <div class="kit-player-left"><div class="kit-player-skin">${p.skin?`<img src="${p.skin}">`:esc(p.name.slice(0,2))}</div><strong>${esc(p.name)}</strong><span class="up">⌃</span></div>
-     <span class="kit-region">${esc(p.region)}</span>
-   </div>`).join('')}</div></section>`;
- }).join('')}</div>`:`<div class="empty"><h2>No players yet</h2><p>No players have been added to this kit.</p></div>`;
+   return `<section class="kit-tier-column tier-col-${n}">
+     <div class="kit-tier-title ${colors[i]}">TIER #${n}</div>
+     <div class="kit-tier-list">${arr.length?arr.map(({p})=>`<div class="kit-player-card" data-player="${esc(p.id)}">
+       <div class="kit-player-left">
+         <div class="kit-player-skin">${p.skin?`<img src="${p.skin}" alt="">`:esc(p.name.slice(0,2).toUpperCase())}</div>
+         <strong>${esc(p.name)}</strong>
+         <span class="up">⌃</span>
+       </div>
+       <span class="kit-region">${esc(p.region)}</span>
+     </div>`).join(''):'<div class="kit-empty">No players</div>'}</div>
+   </section>`;
+ }).join('')}</div></div>`;
  b.querySelectorAll('[data-player]').forEach(r=>r.onclick=()=>profile(r.dataset.player));
 }
 setupGlobalSearch();
