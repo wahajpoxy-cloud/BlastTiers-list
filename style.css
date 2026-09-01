@@ -398,3 +398,147 @@ body { min-width: 0 !important; }
  .kit-page-panel .kit-board-wrap{overflow-x:auto!important;padding-bottom:5px!important}
  .kit-page-panel .kit-board{min-width:930px!important}
 }
+
+
+/* =========================================================
+   BLASTTIER — KITS PAGE ONLY
+   Reference-style blue tier board. No horizontal scrollbar.
+   ========================================================= */
+#kitRows .kit-board-wrap{
+  width:100%;
+  overflow:hidden;
+  padding:0;
+  background:#081522;
+  border:1px solid #1e3a53;
+  border-radius:12px;
+}
+#kitRows .kit-board{
+  width:100%;
+  min-width:0;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:7px;
+  align-items:stretch;
+  padding:8px;
+}
+#kitRows .kit-tier-column{
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #24455f;
+  border-radius:7px;
+  background:#07121e;
+  box-shadow:none;
+}
+#kitRows .kit-tier-title,
+#kitRows .kit-tier-title.gold,
+#kitRows .kit-tier-title.silver,
+#kitRows .kit-tier-title.bronze,
+#kitRows .kit-tier-title.red,
+#kitRows .kit-tier-title.gray{
+  height:52px;
+  display:flex;
+  align-items:center;
+  padding:0 13px;
+  clip-path:none;
+  color:#eaf5ff;
+  background:linear-gradient(135deg,#176eaf,#0b3b68);
+  border-bottom:1px solid #2a6795;
+  font-size:16px;
+  font-weight:900;
+}
+#kitRows .kit-tier-list{
+  min-height:48px;
+  background:#07121e;
+}
+#kitRows .kit-player-card,
+#kitRows .tier-col-1 .kit-player-card:nth-child(odd),
+#kitRows .tier-col-2 .kit-player-card:nth-child(odd),
+#kitRows .tier-col-3 .kit-player-card:nth-child(odd),
+#kitRows .tier-col-4 .kit-player-card,
+#kitRows .tier-col-5 .kit-player-card:nth-child(odd){
+  height:48px;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  padding:0 7px;
+  border-bottom:1px solid #173047;
+  background:#0b1927;
+  cursor:pointer;
+  filter:none;
+}
+#kitRows .kit-player-card:nth-child(even){
+  background:#091622;
+}
+#kitRows .kit-player-card:hover{
+  background:#10283d;
+  filter:none;
+}
+#kitRows .kit-player-left{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+#kitRows .kit-player-skin{
+  width:30px;
+  height:30px;
+  flex:0 0 30px;
+  border:1px solid #2b4a63;
+  border-radius:4px;
+  background:#0d2032;
+}
+#kitRows .kit-player-card strong{
+  min-width:0;
+  font-size:14px;
+  color:#eef7ff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#kitRows .kit-player-card .up{
+  display:none;
+}
+#kitRows .kit-region{
+  flex:0 0 auto;
+  padding:4px 5px;
+  border-radius:5px;
+  background:#0b3151;
+  color:#72c4ff;
+  border:1px solid #1d5d8e;
+  font-size:10px;
+}
+#kitRows .kit-empty{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#58728a;
+  background:#07121e;
+  font-size:11px;
+}
+@media(max-width:1050px){
+  #kitRows .kit-board{
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:4px;
+    padding:5px;
+  }
+  #kitRows .kit-tier-title,
+  #kitRows .kit-tier-title.gold,
+  #kitRows .kit-tier-title.silver,
+  #kitRows .kit-tier-title.bronze,
+  #kitRows .kit-tier-title.red,
+  #kitRows .kit-tier-title.gray{
+    padding:0 8px;
+    font-size:13px;
+  }
+  #kitRows .kit-player-card{padding:0 4px}
+  #kitRows .kit-player-skin{width:26px;height:26px;flex-basis:26px}
+  #kitRows .kit-player-card strong{font-size:12px}
+}
+@media(max-width:720px){
+  #kitRows .kit-board{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
