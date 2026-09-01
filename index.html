@@ -1,1 +1,299 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home — BlastTier</title><link rel="stylesheet" href="style.css"></head><body><header class="navbar"><a class="brand" href="index.html">BLAST<span>TIER</span><b>◆</b></a><nav class="nav"><a href="index.html">⌂ Home</a><a href="rankings.html">🏆 Rankings</a><a href="chat.html">💬 Chat</a><a href="discords.html">🎮 Discords⌄</a><a href="api.html">▤ API Docs</a></nav><input id="globalSearch" class="search" placeholder="Search player..." autocomplete="off"></header><main class="wrap"><section class="hero"><div class="eyebrow">MINECRAFT PVP RANKINGS</div><h1>Welcome to <span>BlastTier</span></h1><p>Track competitive players, kits and tiers in one clean ranking system.</p><a class="btn primary" href="rankings.html">🏆 View Rankings</a><a class="btn" href="discords.html">🎮 Join Discord</a></section><section class="section"><div class="section-head"><div><h2>Explore Kits</h2><div class="muted">Choose a category to view its rankings.</div></div></div><div id="homeKits" class="kit-grid"></div></section></main><footer class="footer">BlastTier • Minecraft PvP Rankings</footer><script src="script.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BlastTier</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#080f18;color:#edf3fb;min-height:100vh}
+.topline{height:3px;background:linear-gradient(90deg,#0756b8,#36a0ff,#0756b8)}
+.nav{height:69px;margin:7px;border:1px solid #1e2d3e;border-radius:14px;background:#101923;display:flex;align-items:center;padding:0 18px;gap:26px}
+.logo{font-size:27px;font-weight:900;letter-spacing:-2px;color:#fff;text-shadow:0 2px 10px #147bff}.logo span{color:#1686ff}
+.links{display:flex;gap:5px;flex:1}.links a{color:#68788d;text-decoration:none;padding:12px 14px;border-radius:9px;font-weight:700}.links a.active,.links a:hover{color:#fff;background:#18283a}
+.search{width:215px;background:#182433;border:1px solid #24374d;border-radius:24px;color:#fff;padding:11px 15px;outline:none}
+.main{padding:45px 8px 35px}.panel{display:none}.panel.active{display:block}
+.category{display:flex;overflow:auto;border-bottom:1px solid #253445}.category button{min-width:115px;height:61px;background:#0e1721;color:#61738a;border:1px solid #1e3042;border-bottom:0;border-radius:24px 24px 0 0;font-weight:800;cursor:pointer;font-size:14px}.category button .ico{display:block;font-size:24px;margin-bottom:2px}.category button.active{color:#fff;border-bottom:3px solid #fff;background:#122034}
+.content{border:1px solid #1d3044;border-radius:0 15px 15px 15px;background:#0e1823;min-height:500px;padding:17px 32px}.rounded{border-radius:15px}.topbar{display:flex;justify-content:flex-end;gap:9px;margin-bottom:22px;flex-wrap:wrap}
+.btn{border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer}.info{background:#1a2b3e;color:#fff}.blue{background:#1879df;color:#fff}.blue:hover{background:#278af1}.red{background:#d6424d;color:#fff}.gray{background:#293949;color:#fff}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.title{font-size:24px;font-weight:800}.sub{color:#74869a;font-size:14px;margin-top:5px}
+.players{display:flex;flex-direction:column;gap:9px}
+.player-row{display:grid;grid-template-columns:60px 1fr 90px 1fr;gap:10px;align-items:center;min-height:70px;border:1px solid #1c2b3b;background:#111d29;border-radius:11px;padding:7px 12px}.rank{font-size:25px;font-weight:900;font-style:italic}.pinfo{display:flex;align-items:center;gap:13px}.avatar{width:48px;height:48px;border-radius:7px;background:#263a50;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff}.pname{font-size:18px;font-weight:800}.points{color:#7890aa;font-size:13px;margin-top:4px}.region{justify-self:start;padding:10px 11px;border-radius:7px;background:#432531;color:#f06473;font-weight:900}.tier-list{display:flex;justify-content:flex-start;gap:8px;flex-wrap:wrap}.tier-pill{text-align:center;min-width:43px}.kit-circle{width:34px;height:34px;border-radius:50%;border:2px solid #344b61;background:#0a111a;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 0 2px #101a25}.tier-label{font-size:13px;color:#f4b632;font-weight:800;margin-top:2px}
+.empty{text-align:center;padding:75px 20px;color:#6f8195}.empty .big{font-size:55px;margin-bottom:12px}.empty h2{color:#cbd5e1;margin-bottom:7px}.empty p{max-width:500px;margin:auto;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:15px}.card{background:#121e2a;border:1px solid #26384b;border-radius:11px;padding:18px}.kit-icon{width:68px;height:68px;border-radius:11px;background:#1b2c40;display:flex;align-items:center;justify-content:center;font-size:35px;margin-bottom:13px}.kit-card{position:relative}.overlay{position:absolute;right:12px;top:12px;width:42px;height:42px;border-radius:50%;background:#0a1119;border:2px solid #2c83d8;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px #1477d833}
+.modal{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.show{display:flex}.box{width:100%;max-width:440px;background:#121e2a;border:1px solid #2b4157;border-radius:13px;padding:23px}.box h2{margin-bottom:18px}.field{margin-bottom:13px}.field label{display:block;color:#aebccc;font-size:13px;margin-bottom:6px}.field input,.field select{width:100%;background:#0b141e;border:1px solid #304459;color:#fff;border-radius:7px;padding:11px;outline:0}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+@media(max-width:900px){.table-head,.player-row{grid-template-columns:45px 1fr 70px}.player-row .tier-list{grid-column:auto}.nav{gap:8px}.links a{padding:10px 7px}.search{width:150px}}
+@media(max-width:600px){.logo{font-size:21px}.links .txt{display:none}.search{width:125px}.content{padding:13px}.category button{min-width:90px}}
+
+.icon-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.icon-choice{height:58px;border:1px solid #263b52;border-radius:9px;background:#0b1520;color:#91a6bc;font-weight:800;cursor:pointer}
+.icon-choice.selected{border:2px solid #2389ed;background:#132a43;color:#fff;box-shadow:0 0 12px #1676d933}
+.kit-svg{width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:24px;line-height:1;vertical-align:middle}
+.kit-logo{width:42px;height:42px;border-radius:50%;background:#0a1119;border:2px solid #273b50;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 2px #101b26}
+.kit-logo svg{width:27px;height:27px}
+</style>
+</head>
+<body>
+<div class="topline"></div>
+<nav class="nav">
+<div class="logo"><span>BLAST</span>TIER</div>
+<div class="links">
+<a href="#" class="active" onclick="showPage('rankings',this);return false">⌂ <span class="txt">Home</span></a>
+<a href="#" onclick="showPage('rankings',this);return false">🏆 <span class="txt">Rankings</span></a>
+<a href="#" onclick="showPage('kits',this);return false">⚔ <span class="txt">Kits</span></a>
+<a href="#" onclick="showPage('tiers',this);return false">▣ <span class="txt">Tiers</span></a>
+<a href="#" onclick="showPage('chat',this);return false">💬 <span class="txt">Chat</span></a>
+</div>
+<input class="search" id="search" placeholder="⌕  Search player..." oninput="renderPlayers()">
+</nav>
+
+<main class="main">
+<section id="rankings" class="panel active">
+<div class="category">
+<button class="active" onclick="cat(this)">🏆<span class="ico"> </span>Overall</button>
+<button onclick="cat(this)">⚔️<span class="ico"></span>LTMs</button>
+<button onclick="cat(this)">◈<span class="ico"></span>Vanilla</button>
+<button onclick="cat(this)">❤<span class="ico"></span>UHC</button>
+<button onclick="cat(this)">🧪<span class="ico"></span>Pot</button>
+<button onclick="cat(this)">👾<span class="ico"></span>NethOP</button>
+<button onclick="cat(this)">🟢<span class="ico"></span>SMP</button>
+<button onclick="cat(this)">🗡️<span class="ico"></span>Sword</button>
+<button onclick="cat(this)">🔨<span class="ico"></span>Axe</button>
+<button onclick="cat(this)">🔱<span class="ico"></span>Mace</button>
+</div>
+<div class="content">
+<div class="topbar">
+<button class="btn info">ⓘ Information</button>
+<button class="btn blue" onclick="openModal('player')">+ Add Player</button>
+<button class="btn blue" onclick="openModal('tier')">+ Add Tier</button>
+<button class="btn blue" onclick="openModal('kit')">+ Add Kit</button>
+</div>
+
+<div id="playerRows" class="players"></div>
+</div>
+</section>
+
+<section id="kits" class="panel"><div class="content rounded">
+<div class="head"><div><div class="title">All Kits</div><div class="sub">Manage the kits used by your rankings.</div></div><button class="btn blue" onclick="openModal('kit')">+ Add Kit</button></div>
+<div id="kitGrid" class="grid"></div>
+</div></section>
+
+<section id="tiers" class="panel"><div class="content rounded">
+<div class="head"><div><div class="title">Tiers</div><div class="sub">Create tiers and use them for your players.</div></div><button class="btn blue" onclick="openModal('tier')">+ Add Tier</button></div>
+<div id="tierGrid" class="grid"></div>
+</div></section>
+<section id="chat" class="panel">
+<div class="content rounded" style="min-height:500px">
+<div class="head"><div><div class="title">Community Chat</div><div class="sub">Chat with other BlastTier users.</div></div></div>
+<div id="chatMessages" style="height:330px;overflow:auto;background:#0a131d;border:1px solid #203449;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:9px">
+<div class="muted" style="text-align:center;padding:100px 10px">No messages yet. Start the conversation.</div>
+</div>
+<div style="display:flex;gap:9px;margin-top:12px">
+<input id="chatInput" class="search" style="width:auto;flex:1;border-radius:8px" placeholder="Write a message..." onkeydown="if(event.key==='Enter')sendChat()">
+<button class="btn blue" onclick="sendChat()">Send</button>
+</div>
+</div>
+</section>
+
+</main>
+
+<div id="playerModal" class="modal"><div class="box">
+<h2>Add Player</h2>
+<div class="field"><label>Player name</label><input id="pn" placeholder="Minecraft username"></div>
+<div class="field"><label>Region</label><select id="pr"><option>NA</option><option>EU</option><option>AS</option><option>OCE</option><option>SA</option></select></div>
+<div class="field"><label>Tier</label><select id="pt"><option value="">No tier</option></select></div>
+<div class="field"><label>Player Rank</label>
+<select id="prank">
+<option>Combat Grandmaster</option>
+<option>Combat Ace</option>
+<option>Combat Master</option>
+<option>Combat Specialist</option>
+<option>Combat Apprentice</option>
+</select></div>
+<div class="field"><label>Points</label><input id="pp" type="number" value="0" min="0" placeholder="0"></div>
+<div class="field"><label>Player skin</label><input id="ps" type="file" accept="image/png,image/jpeg,image/webp"></div>
+<div class="actions"><button class="btn gray" onclick="closeModal()">Cancel</button><button class="btn blue" onclick="addPlayer()">Add Player</button></div>
+</div></div>
+
+<div id="kitModal" class="modal"><div class="box">
+<h2>Add Kit</h2>
+<div class="field"><label>Kit name</label><input id="kn" placeholder="e.g. Sword"></div>
+<div class="field"><label>Kit logo</label>
+<div id="iconPicker" class="icon-picker">
+<button type="button" class="icon-choice selected" data-icon="sword" onclick="pickIcon(this)">SWORD</button>
+<button type="button" class="icon-choice" data-icon="axe" onclick="pickIcon(this)">AXE</button>
+<button type="button" class="icon-choice" data-icon="mace" onclick="pickIcon(this)">MACE</button>
+<button type="button" class="icon-choice" data-icon="potion" onclick="pickIcon(this)">POT</button>
+<button type="button" class="icon-choice" data-icon="crystal" onclick="pickIcon(this)">CRYSTAL</button>
+<button type="button" class="icon-choice" data-icon="pearl" onclick="pickIcon(this)">PEARL</button>
+<button type="button" class="icon-choice" data-icon="helmet" onclick="pickIcon(this)">NETHOP</button>
+<button type="button" class="icon-choice" data-icon="heart" onclick="pickIcon(this)">UHC</button>
+</div></div>
+<div class="actions"><button class="btn gray" onclick="closeModal()">Cancel</button><button class="btn blue" onclick="addKit()">Add Kit</button></div>
+</div></div>
+
+<div id="tierModal" class="modal"><div class="box">
+<h2>Add Tier</h2>
+<div class="field"><label>Tier name</label><input id="tn" placeholder="e.g. HT1"></div>
+<div class="field"><label>Tier color/icon</label><input id="ti" placeholder="🏆"></div>
+<div class="actions"><button class="btn gray" onclick="closeModal()">Cancel</button><button class="btn blue" onclick="addTier()">Add Tier</button></div>
+</div></div>
+
+<script>
+
+const KIT_ICONS={
+ sword:'🗡️',
+ axe:'🪓',
+ mace:'🔨',
+ potion:'🧪',
+ crystal:'💎',
+ pearl:'🟢',
+ helmet:'👾',
+ heart:'❤️'
+};
+
+function readArray(keys){
+ for(const key of keys){
+  try{
+   const raw=localStorage.getItem(key);
+   if(raw!==null){const value=JSON.parse(raw);if(Array.isArray(value))return value;}
+  }catch(e){}
+ }
+ return [];
+}
+let players=readArray(['blasttier_players','bt_players','mctiers_players']);
+let kits=readArray(['blasttier_kits','bt_kits','mctiers_kits']);
+let tiers=readArray(['blasttier_tiers','bt_tiers','mctiers_tiers']);
+
+function showPage(id,el){document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.links a').forEach(x=>x.classList.remove('active'));if(el)el.classList.add('active');render()}
+function cat(el){document.querySelectorAll('.category button').forEach(x=>x.classList.remove('active'));el.classList.add('active')}
+function openModal(type){
+ document.getElementById(type+'Modal').classList.add('show');
+ if(type==='player'){fillTierSelect();document.getElementById('prank').value='Combat Grandmaster'}
+ if(type==='kit'){selectedIcon='sword';document.querySelectorAll('.icon-choice').forEach(x=>x.classList.toggle('selected',x.dataset.icon==='sword'))}
+}
+function closeModal(){
+ document.querySelectorAll('.modal').forEach(x=>x.classList.remove('show'));
+}
+
+let chats=JSON.parse(localStorage.getItem('blasttier_chat')||'[]');
+function sendChat(){
+ let input=document.getElementById('chatInput'),text=input.value.trim();
+ if(!text)return;
+ chats.push({name:'You',text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+ localStorage.setItem('blasttier_chat',JSON.stringify(chats));
+ input.value='';renderChat();
+}
+function renderChat(){
+ let box=document.getElementById('chatMessages');if(!box)return;
+ if(!chats.length){box.innerHTML='<div class="muted" style="text-align:center;padding:100px 10px">No messages yet. Start the conversation.</div>';return}
+ box.innerHTML=chats.map(m=>`<div style="background:#132132;border:1px solid #21374d;border-radius:9px;padding:10px 12px"><b style="color:#4da3ff">${esc(m.name)}</b><span class="muted" style="margin-left:8px">${esc(m.time)}</span><div style="margin-top:5px">${esc(m.text)}</div></div>`).join('');
+ box.scrollTop=box.scrollHeight;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function save(){
+ const p=JSON.stringify(players),k=JSON.stringify(kits),t=JSON.stringify(tiers);
+ ['blasttier_players','bt_players'].forEach(key=>localStorage.setItem(key,p));
+ ['blasttier_kits','bt_kits'].forEach(key=>localStorage.setItem(key,k));
+ ['blasttier_tiers','bt_tiers'].forEach(key=>localStorage.setItem(key,t));
+}
+function fillTierSelect(){
+ const el=document.getElementById('pt');
+ if(!el)return;
+ el.innerHTML='<option value="">No tier</option>'+tiers.map(t=>`<option value="${esc(t.name)}">${esc(t.name)}</option>`).join('');
+}
+function addPlayer(){
+ let name=pn.value.trim();
+ if(!name)return alert('Enter a player name.');
+ let file=document.getElementById('ps').files[0];
+ let player={
+   name,
+   region:pr.value,
+   tier:pt.value,
+   tiers:pt.value?[pt.value]:[],
+   avatar:name.slice(0,2).toUpperCase(),
+   title:document.getElementById('prank').value||'Combat Master',
+   points:document.getElementById('pp').value||'0',
+   skin:''
+ };
+ if(file){
+   let reader=new FileReader();
+   reader.onload=function(e){player.skin=e.target.result;players.push(player);finishPlayer()};
+   reader.readAsDataURL(file);
+ }else{players.push(player);finishPlayer()}
+}
+function finishPlayer(){
+ save();pn.value='';document.getElementById('pp').value='0';document.getElementById('ps').value='';document.getElementById('prank').value='Combat Grandmaster';closeModal();render()
+}
+let selectedIcon='sword';
+function pickIcon(el){document.querySelectorAll('.icon-choice').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');selectedIcon=el.dataset.icon}
+function addKit(){let name=kn.value.trim();if(!name)return alert('Enter a kit name.');kits.push({name,icon:selectedIcon});save();kn.value='';selectedIcon='sword';document.querySelectorAll('.icon-choice').forEach(x=>x.classList.toggle('selected',x.dataset.icon==='sword'));closeModal();render()}
+function addTier(){let name=tn.value.trim();if(!name)return alert('Enter a tier name.');tiers.push({name,icon:ti.value.trim()||'🏆'});save();tn.value='';ti.value='';closeModal();render()}
+function delPlayer(i){if(confirm('Delete this player?')){players.splice(i,1);save();render()}}
+function delKit(i){if(confirm('Delete this kit?')){kits.splice(i,1);save();render()}}
+function delTier(i){if(confirm('Delete this tier?')){tiers.splice(i,1);save();render()}}
+function renderPlayers(){
+let q=(document.getElementById('search').value||'').toLowerCase(),
+list=players.filter(p=>p.name.toLowerCase().includes(q)),
+box=document.getElementById('playerRows');
+
+if(!list.length){
+ box.innerHTML='<div class="empty"><div class="big">🏆</div><h2>No Rankings Available</h2><p>Add a player with the <b>+ Add Player</b> button above.</p></div>';
+ return;
+}
+
+box.innerHTML=list.map((p,i)=>{
+ let real=players.indexOf(p);
+ let playerTiers=p.tiers&&p.tiers.length?p.tiers:(p.tier?[p.tier]:[]);
+ return `<div class="player-row">
+   <div class="rank">${i+1}.</div>
+   <div class="pinfo">
+     <div class="avatar-wrap">
+       <div class="avatar">${p.skin?`<img src="${p.skin}" style="width:100%;height:100%;object-fit:cover;border-radius:7px">`:esc(p.avatar||p.name.slice(0,2).toUpperCase())}</div>
+     </div>
+     <div>
+       <div class="pname">${esc(p.name)}</div>
+       <div class="points"><span style="color:#f5bd2e">◆</span> ${esc(p.title||'Combat Master')} <span style="color:#70849b">(${esc(p.points||'0')} points)</span></div>
+     </div>
+   </div>
+   <div><span class="region">${esc(p.region)}</span></div>
+   <div class="tier-list">
+     ${playerTiers.length
+       ? playerTiers.map(t=>{let found=tiers.find(x=>x.name===t);let icon=(found&&found.icon)||'sword';return `<div class="tier-pill"><div class="kit-logo"><span class="kit-svg" data-kit-icon="${esc(icon)}"></span></div><div class="tier-label">${esc(t)}</div></div>`}).join('')
+       : '<span class="muted">No tiers</span>'}
+     <button class="btn red" style="padding:6px 9px;margin-left:4px" onclick="delPlayer(${real})">×</button>
+   </div>
+ </div>`;
+}).join('')
+}
+function renderKits(){let box=document.getElementById('kitGrid');box.innerHTML=kits.length?kits.map((k,i)=>`<div class="card kit-card"><div class="overlay"><span class="kit-svg" data-kit-icon="${esc(k.icon)}"></span></div><div class="kit-icon"><span class="kit-svg" data-kit-icon="${esc(k.icon)}"></span></div><h3>${esc(k.name)}</h3><p class="muted">Custom BlastTier kit</p><button class="btn red" style="margin-top:15px" onclick="delKit(${i})">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1;padding:65px"><div class="big">⚔️</div><h2>No kits added</h2><p>Use Add Kit to create your first kit.</p></div>'}
+function renderTiers(){let box=document.getElementById('tierGrid');box.innerHTML=tiers.length?tiers.map((t,i)=>`<div class="card"><div style="font-size:32px">${esc(t.icon)}</div><h3>${esc(t.name)}</h3><p class="muted">Custom BlastTier tier</p><button class="btn red" style="margin-top:15px" onclick="delTier(${i})">Delete</button></div>`).join(''):'<div class="empty" style="grid-column:1/-1;padding:65px"><div class="big">🏅</div><h2>No tiers added</h2><p>Use Add Tier to create your ranking tiers.</p></div>'}
+function renderKitIcons(){
+ document.querySelectorAll('[data-kit-icon]').forEach(el=>{
+   let key=el.getAttribute('data-kit-icon')||'sword';
+   el.innerHTML=KIT_ICONS[key]||KIT_ICONS.sword;
+ });
+}
+function render(){renderPlayers();renderKits();renderTiers();fillTierSelect();renderKitIcons()}
+
+function sendChat(){
+ let input=document.getElementById('chatInput'),text=input.value.trim();
+ if(!text)return;
+ chats.push({name:'You',text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+ localStorage.setItem('blasttier_chat',JSON.stringify(chats));
+ input.value='';renderChat();
+}
+function renderChat(){
+ let box=document.getElementById('chatMessages');if(!box)return;
+ if(!chats.length){box.innerHTML='<div class="muted" style="text-align:center;padding:100px 10px">No messages yet. Start the conversation.</div>';return}
+ box.innerHTML=chats.map(m=>`<div style="background:#132132;border:1px solid #21374d;border-radius:9px;padding:10px 12px"><b style="color:#4da3ff">${esc(m.name)}</b><span class="muted" style="margin-left:8px">${esc(m.time)}</span><div style="margin-top:5px">${esc(m.text)}</div></div>`).join('');
+ box.scrollTop=box.scrollHeight;
+}
+
+document.querySelectorAll('.modal').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal()});
+closeModal();
+render();
+renderChat();
+</script>
+</body>
+</html>
