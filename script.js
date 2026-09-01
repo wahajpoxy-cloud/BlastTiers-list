@@ -2,7 +2,18 @@
 const KIT_DEFAULT=[['Overall','overall'],['LTMs','ltms'],['Vanilla','vanilla'],['UHC','uhc'],['Pot','pot'],['NethOP','nethop'],['SMP','smp'],['Diamond SMP','diamond-smp'],['Sword','sword'],['Axe','axe'],['Mace','mace'],['Cart','cart'],['SpearMace','spearmace']];
 const KEY='blasttier_final_v6';
 let data=JSON.parse(localStorage.getItem(KEY)||'null');
-if(!data)data={players:[],kits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),tiers:[],messages:[]};
+if(!data){
+  const oldPlayers=JSON.parse(localStorage.getItem('bt_players')||'null');
+  const oldKits=JSON.parse(localStorage.getItem('bt_kits')||'null');
+  const oldTiers=JSON.parse(localStorage.getItem('bt_tiers')||'null');
+  data={
+    players:Array.isArray(oldPlayers)?oldPlayers:[],
+    kits:Array.isArray(oldKits)&&oldKits.length?oldKits:KIT_DEFAULT.slice(1).map(x=>({name:x[0],icon:x[1]})),
+    tiers:Array.isArray(oldTiers)?oldTiers:[],
+    messages:[]
+  };
+  localStorage.setItem(KEY,JSON.stringify(data));
+}
 const $=s=>document.querySelector(s); const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem(KEY,JSON.stringify(data))}
 function kitByName(n){return data.kits.find(k=>k.name===n)}
